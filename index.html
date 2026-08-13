@@ -376,7 +376,8 @@
       <h3 id="modalTitle">Request Your Free Quote</h3>
       <p class="modal-sub">Tell us a bit about your property. Someone from our team will follow up personally — no pricing over the phone, just a real conversation.</p>
 
-      <form id="quoteForm" novalidate>
+      <form id="quoteForm" action="https://api.web3forms.com/submit" method="POST">
+  <input type="hidden" name="access_key" value="8217dd13-c234-4516-b1a3-09b6ea907a6b">
         <div class="form-row">
           <label for="q-name">Full Name</label>
           <input type="text" id="q-name" name="name" autocomplete="name" required>

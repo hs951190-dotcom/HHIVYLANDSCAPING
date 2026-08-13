@@ -331,19 +331,33 @@
       return;
     }
 
-    // Simulate submission and reveal the animated success state
-    var successMessageEl = document.getElementById('successMessage');
-    var firstName = result.data.name.split(' ')[0];
-    successMessageEl.textContent = 'Thank you, ' + firstName + '!';
+   // Submit form data asynchronously to Web3Forms
+    var formData = new FormData(quoteForm);
 
-    // Re-trigger the checkmark draw animation each time it's shown
-    var successCheck = modalSuccess.querySelector('.success-check');
-    successCheck.innerHTML = successCheck.innerHTML;
+    fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      body: formData
+    })
+    .then(function(response) {
+      if (response.ok) {
+        var successMessageEl = document.getElementById('successMessage');
+        var firstName = result.data.name.split(' ')[0];
+        successMessageEl.textContent = 'Thank you, ' + firstName + '!';
 
-    modalFormWrap.hidden = true;
-    modalSuccess.hidden = false;
-    var doneBtn = document.getElementById('modalDoneBtn');
-    if (doneBtn) doneBtn.focus();
+        var successCheck = modalSuccess.querySelector('.success-check');
+        successCheck.innerHTML = successCheck.innerHTML;
+
+        modalFormWrap.hidden = true;
+        modalSuccess.hidden = false;
+        var doneBtn = document.getElementById('modalDoneBtn');
+        if (doneBtn) doneBtn.focus();
+      } else {
+        alert('There was an error submitting your request. Please try again.');
+      }
+    })
+    .catch(function(error) {
+      alert('Network error. Please try again or call us directly.');
+    });
   });
 
 })();
