@@ -693,3 +693,20 @@ html[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
   .modal-card { padding: 34px 24px; }
   .hero-content { padding: 100px 24px 70px; }
 }
+/* ==========================================================================
+   Logo image integration styling
+   ========================================================================== */
+.brand-logo-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+}
+
+.cta-logo-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  object-fit: cover;
+}
