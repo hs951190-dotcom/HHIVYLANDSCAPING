@@ -381,8 +381,8 @@
     });
   });
 
-  /* ------------------------------------------------------------------
-     8. Quote Form Submissions (Web3Forms)
+    /* ------------------------------------------------------------------
+     8. Quote Form Submissions (Web3Forms + Automatic WhatsApp Dispatch)
      ------------------------------------------------------------------ */
   var quoteModal = document.getElementById('quoteModal');
   var quoteModalClose = document.getElementById('modalClose');
@@ -431,7 +431,17 @@
 
   quoteForm.addEventListener('submit', function (e) {
     e.preventDefault();
+    var result = validateForm();
+
+    if (!result.isValid) {
+      var invalidInput = document.getElementById('q-' + result.firstInvalidField);
+      if (invalidInput) invalidInput.focus();
+      return;
+    }
+
     var formData = new FormData(quoteForm);
+
+    // 1. Submit to Web3Forms for Email notification
     fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       body: formData
@@ -439,6 +449,27 @@
       if (res.ok) {
         modalFormWrap.hidden = true;
         modalSuccess.hidden = false;
+
+        // 2. Prepare pre-filled WhatsApp message
+        var clientPhone = "16723995554"; // H&H Ivy Landscaping WhatsApp number
+        var waMessage = 
+          "🌿 *NEW QUOTE REQUEST — H&H IVY LANDSCAPING*\n\n" +
+          "👤 *Name:* " + result.data.name + "\n" +
+          "📞 *Phone:* " + result.data.phone + "\n" +
+          "📧 *Email:* " + result.data.email + "\n" +
+          "📍 *City:* " + result.data.city + "\n" +
+          "🛠️ *Service:* " + result.data.service + "\n" +
+          "📅 *Preferred Date:* " + result.data.date + "\n" +
+          "⏰ *Preferred Time:* " + result.data.time + "\n" +
+          (result.data.description ? "📝 *Notes:* " + result.data.description + "\n" : "");
+
+        var waUrl = "https://wa.me/" + clientPhone + "?text=" + encodeURIComponent(waMessage);
+
+        // 3. Open WhatsApp in a new tab/app after 400ms delay
+        setTimeout(function() {
+          window.open(waUrl, '_blank');
+        }, 400);
+
       } else {
         alert('There was an error submitting your request. Please try again.');
       }
@@ -446,6 +477,7 @@
       alert('Network error. Please try again.');
     });
   });
+
 
   /* ------------------------------------------------------------------
      Live Surrey Weather & Seasonal Turf Advisory Banner
