@@ -576,3 +576,67 @@ html[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
   .weather-banner-inner { padding: 8px 16px; }
   .weather-text { font-size: 12px; }
 }
+
+/* ==========================================================================
+   Advanced Micro-Interactions & Animation Styles
+   ========================================================================== */
+
+/* 1. Ambient Hero Leaf Particle Canvas */
+.hero-leaf-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.6;
+}
+
+/* 2. Staggered Scroll-Reveal States */
+.reveal-init {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 3. 3D Perspective Card Tilt Surface */
+.tilt-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.15s ease-out, box-shadow 0.3s var(--ease);
+}
+
+/* 4. Magnetic Buttons */
+.magnetic-btn {
+  will-change: transform;
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.35s var(--ease);
+}
+
+/* 5. Shimmer Sweep on Badges */
+.project-badge-split {
+  position: relative;
+  overflow: hidden;
+}
+
+.project-badge-split::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 80%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  animation: badgeShimmer 4s infinite ease-in-out;
+}
+
+@keyframes badgeShimmer {
+  0%, 70% { left: -120%; }
+  100% { left: 160%; }
+}
