@@ -995,3 +995,104 @@ html[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
     display: none;
   }
 }
+
+/* ==========================================================================
+   Live Surrey Weather & Seasonal Turf Advisory Banner
+   ========================================================================== */
+.weather-banner {
+  background: var(--deep-slate, #121B03);
+  color: var(--white, #FFFFFF);
+  border-bottom: 1px solid rgba(227, 238, 226, 0.15);
+  font-size: 13.5px;
+  position: relative;
+  z-index: 101;
+  transition: transform 0.35s var(--ease), opacity 0.35s var(--ease);
+}
+.weather-banner.hidden {
+  display: none;
+}
+.weather-banner-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 32px;
+  gap: 16px;
+}
+.weather-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.weather-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(71, 151, 59, 0.2);
+  border: 1px solid rgba(71, 151, 59, 0.4);
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mint, #E3EEE2);
+  white-space: nowrap;
+}
+.weather-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #47973B;
+  box-shadow: 0 0 6px #47973B;
+}
+.weather-text {
+  color: rgba(249, 251, 249, 0.88);
+  font-weight: 500;
+}
+.weather-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.weather-cta {
+  background: transparent;
+  border: none;
+  color: var(--mint, #E3EEE2);
+  font-weight: 700;
+  font-size: 12.5px;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+.weather-cta:hover {
+  color: #FFFFFF;
+}
+.weather-close {
+  background: none;
+  border: none;
+  color: rgba(249, 251, 249, 0.6);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.weather-close:hover {
+  color: #FFFFFF;
+}
+
+@media (max-width: 760px) {
+  .weather-banner-inner {
+    padding: 8px 16px;
+  }
+  .weather-text {
+    font-size: 12px;
+  }
+  .weather-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+  }
+}
+
