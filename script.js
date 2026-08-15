@@ -447,4 +447,63 @@
     });
   });
 
+  /* ------------------------------------------------------------------
+     Live Surrey Weather & Seasonal Turf Advisory Banner
+     ------------------------------------------------------------------ */
+  var weatherBanner = document.getElementById('weatherBanner');
+  var weatherTempEl = document.getElementById('weatherTemp');
+  var weatherMsgEl = document.getElementById('weatherMsg');
+  var closeWeatherBtn = document.getElementById('closeWeatherBtn');
+
+  if (closeWeatherBtn) {
+    closeWeatherBtn.addEventListener('click', function() {
+      weatherBanner.classList.add('hidden');
+      try { sessionStorage.setItem('hh_weather_dismissed', '1'); } catch (e) {}
+    });
+  }
+
+  // Surrey, BC Coordinates: 49.1913° N, 122.8490° W
+  function fetchSurreyWeather() {
+    if (sessionStorage.getItem('hh_weather_dismissed') === '1') {
+      weatherBanner.classList.add('hidden');
+      return;
+    }
+
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=49.1913&longitude=-122.8490&current=temperature_2m,weather_code&timezone=America%2FVancouver')
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (!data || !data.current) return;
+        var temp = Math.round(data.current.temperature_2m);
+        var code = data.current.weather_code;
+        var month = new Date().getMonth(); // 0 = Jan, 11 = Dec
+
+        weatherTempEl.textContent = 'Surrey, BC • ' + temp + '°C';
+
+        // Dynamic seasonal & condition advice
+        if (code >= 51 && code <= 67) {
+          // Rain in Surrey
+          weatherMsgEl.textContent = '🌧️ Rainy spell in Surrey: Ideal ground moisture for aerating and deep fertilizer uptake!';
+        } else if (month >= 2 && month <= 4) {
+          // Spring (March - May)
+          weatherMsgEl.textContent = '🌱 Spring Revival: Core Aeration & Power Raking slots are filling fast in Surrey.';
+        } else if (month >= 5 && month <= 7) {
+          // Summer (June - August)
+          weatherMsgEl.textContent = '☀️ Summer Care: Weekly precision mowing & hydration plans active across Surrey.';
+        } else if (month >= 8 && month <= 10) {
+          // Fall (Sept - Nov)
+          weatherMsgEl.textContent = '🍂 Fall Cleanups & Over-seeding: Prep your lawn before Pacific Northwest winter rains.';
+        } else {
+          // Winter (Dec - Feb)
+          weatherMsgEl.textContent = '❄️ Winter Garden Care: Pruning & structural hedging protection for coastal BC properties.';
+        }
+      })
+      .catch(function() {
+        // Fallback banner text if offline
+        weatherTempEl.textContent = 'Surrey, BC';
+        weatherMsgEl.textContent = '🌱 Regular maintenance slots open for Surrey, Delta & White Rock properties.';
+      });
+  }
+
+  fetchSurreyWeather();
+
 })();
