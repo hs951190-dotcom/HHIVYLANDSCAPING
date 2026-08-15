@@ -903,3 +903,95 @@ html[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
   .comp-before-wrapper .comp-img { width: 100vw; }
   .hero-content { padding: 100px 24px 70px; }
 }
+
+/* ==========================================================================
+   WhatsApp Floating Quick-Chat Widget
+   ========================================================================== */
+.whatsapp-float {
+  position: fixed;
+  bottom: 28px;
+  left: 28px;
+  z-index: 60;
+  width: 54px;
+  height: 54px;
+  background-color: #25D366;
+  color: #FFFFFF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px -4px rgba(37, 211, 102, 0.45);
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  text-decoration: none;
+}
+
+.whatsapp-float:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 28px -4px rgba(37, 211, 102, 0.65);
+}
+
+/* Subtle attention-grabbing pulse ring */
+.whatsapp-pulse {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid #25D366;
+  opacity: 0.8;
+  animation: waPulse 2.4s infinite ease-out;
+  pointer-events: none;
+}
+
+@keyframes waPulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+/* Desktop Hover Tooltip */
+.whatsapp-tooltip {
+  position: absolute;
+  left: calc(100% + 14px);
+  background: var(--deep-slate, #121B03);
+  color: var(--white, #FFFFFF);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-6px);
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.whatsapp-float:hover .whatsapp-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Mobile viewport adjustments */
+@media (max-width: 640px) {
+  .whatsapp-float {
+    bottom: 20px;
+    left: 20px;
+    width: 48px;
+    height: 48px;
+  }
+  .whatsapp-float svg {
+    width: 24px;
+    height: 24px;
+  }
+  .whatsapp-tooltip {
+    display: none;
+  }
+}
