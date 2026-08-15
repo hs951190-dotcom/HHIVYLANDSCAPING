@@ -671,4 +671,166 @@
 
   fetchSurreyWeather();
 
+  /* ------------------------------------------------------------------
+     10. Comprehensive Animation Suite
+     ------------------------------------------------------------------ */
+
+  // A. Scroll-Triggered Animated Counters
+  var counterObserver = new IntersectionObserver(function(entries, observer) {
+    entries.forEach(function(entry) {
+      if (!entry.isIntersecting) return;
+      var el = entry.target;
+      var target = parseInt(el.getAttribute('data-count'), 10);
+      if (isNaN(target)) return;
+
+      var duration = 1600;
+      var startTime = null;
+
+      function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        var progress = Math.min((timestamp - startTime) / duration, 1);
+        // Ease-out cubic formula
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.floor(easeOut * target);
+
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        } else {
+          el.textContent = target;
+        }
+      }
+
+      window.requestAnimationFrame(step);
+      observer.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('[data-count]').forEach(function(counter) {
+    counterObserver.observe(counter);
+  });
+
+  // B. Staggered Scroll-Reveal on Grids
+  var revealTargets = document.querySelectorAll('.service-card, .project-card, .blog-card, .bento-item');
+  revealTargets.forEach(function(el) { el.classList.add('reveal-init'); });
+
+  var revealObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('reveal-visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -40px 0px', threshold: 0.15 });
+
+  revealTargets.forEach(function(el, idx) {
+    el.style.transitionDelay = ((idx % 3) * 110) + 'ms';
+    revealObserver.observe(el);
+  });
+
+  // C. Interactive 3D Card Tilt on Hover (Desktop)
+  if (!reduceMotion && window.innerWidth > 960) {
+    var tiltCards = document.querySelectorAll('.service-card, .project-card, .blog-card');
+    tiltCards.forEach(function(card) {
+      card.classList.add('tilt-card');
+
+      card.addEventListener('mousemove', function(e) {
+        var rect = card.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        var centerX = rect.width / 2;
+        var centerY = rect.height / 2;
+
+        var rotateX = ((y - centerY) / centerY) * -6;
+        var rotateY = ((x - centerX) / centerX) * 6;
+
+        card.style.transform = 'perspective(1000px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) translateY(-4px)';
+      });
+
+      card.addEventListener('mouseleave', function() {
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)';
+      });
+    });
+  }
+
+  // D. Magnetic Pull Effect on Primary CTA Buttons
+  if (!reduceMotion && window.innerWidth > 960) {
+    var magnetics = document.querySelectorAll('.nav-cta, .hero .btn-primary, .admin-trigger-btn');
+    magnetics.forEach(function(btn) {
+      btn.classList.add('magnetic-btn');
+
+      btn.addEventListener('mousemove', function(e) {
+        var rect = btn.getBoundingClientRect();
+        var x = e.clientX - (rect.left + rect.width / 2);
+        var y = e.clientY - (rect.top + rect.height / 2);
+        btn.style.transform = 'translate(' + (x * 0.28) + 'px, ' + (y * 0.28) + 'px)';
+      });
+
+      btn.addEventListener('mouseleave', function() {
+        btn.style.transform = 'translate(0px, 0px)';
+      });
+    });
+  }
+
+  // E. Falling Ivy Leaves Particle Canvas Engine
+  var canvas = document.getElementById('ivyLeafCanvas');
+  if (canvas && !reduceMotion) {
+    var ctx = canvas.getContext('2d');
+    var leaves = [];
+    var leafCount = 14;
+
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    for (var i = 0; i < leafCount; i++) {
+      leaves.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 9 + 8,
+        speedX: Math.random() * 0.8 - 0.2,
+        speedY: Math.random() * 0.7 + 0.4,
+        angle: Math.random() * 360,
+        spin: Math.random() * 0.8 - 0.4,
+        opacity: Math.random() * 0.4 + 0.25
+      });
+    }
+
+    function drawLeaf(ctx, x, y, size, angle, opacity) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate((angle * Math.PI) / 180);
+      ctx.beginPath();
+      ctx.moveTo(0, -size);
+      ctx.bezierCurveTo(size / 2, -size / 2, size / 2, size / 2, 0, size);
+      ctx.bezierCurveTo(-size / 2, size / 2, -size / 2, -size / 2, 0, -size);
+      ctx.fillStyle = 'rgba(71, 151, 59, ' + opacity + ')';
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function renderLeaves() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      leaves.forEach(function(l) {
+        l.x += l.speedX;
+        l.y += l.speedY;
+        l.angle += l.spin;
+
+        if (l.y > canvas.height + 20) {
+          l.y = -20;
+          l.x = Math.random() * canvas.width;
+        }
+        if (l.x > canvas.width + 20) l.x = -20;
+        if (l.x < -20) l.x = canvas.width + 20;
+
+        drawLeaf(ctx, l.x, l.y, l.size, l.angle, l.opacity);
+      });
+      window.requestAnimationFrame(renderLeaves);
+    }
+    renderLeaves();
+  }
+
+
 })();
