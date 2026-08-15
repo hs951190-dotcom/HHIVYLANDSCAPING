@@ -1,5 +1,5 @@
 /* ==========================================================================
-   H&H IVY LANDSCAPING — Site interactions
+   H&H IVY LANDSCAPING — Site Interactions, Gallery Slider & Admin Portal
    ========================================================================== */
 (function () {
   'use strict';
@@ -7,7 +7,7 @@
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ------------------------------------------------------------------
-     Dark mode toggle
+     1. Dark Mode Toggle
      ------------------------------------------------------------------ */
   var themeToggle = document.getElementById('themeToggle');
   var THEME_KEY = 'hh-ivy-theme';
@@ -18,14 +18,11 @@
   }
 
   function storeTheme(theme) {
-    try { localStorage.setItem(THEME_KEY, theme); } catch (e) { /* storage unavailable, ignore */ }
+    try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
   }
 
   if (themeToggle) {
-    // Theme was already set on <html> by the inline head script to avoid
-    // a flash of the wrong theme — just sync the button state to match.
     applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
-
     themeToggle.addEventListener('click', function () {
       var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       applyTheme(next);
@@ -34,7 +31,7 @@
   }
 
   /* ------------------------------------------------------------------
-     Sticky nav shadow on scroll
+     2. Sticky Nav & Mobile Menu
      ------------------------------------------------------------------ */
   var siteNav = document.getElementById('siteNav');
   function handleNavShadow() {
@@ -45,9 +42,6 @@
     }
   }
 
-  /* ------------------------------------------------------------------
-     Mobile menu toggle
-     ------------------------------------------------------------------ */
   var navToggle = document.getElementById('navToggle');
   var navLinks = document.getElementById('navLinks');
 
@@ -56,7 +50,6 @@
     navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   });
 
-  // Close mobile menu after tapping a link
   Array.prototype.forEach.call(navLinks.querySelectorAll('.nav-link'), function (link) {
     link.addEventListener('click', function () {
       navLinks.classList.remove('open');
@@ -65,7 +58,7 @@
   });
 
   /* ------------------------------------------------------------------
-     Active section highlighting via IntersectionObserver
+     3. Active Section Spy & Ivy Vine Scroll
      ------------------------------------------------------------------ */
   var sections = document.querySelectorAll('main section[id]');
   var navLinkMap = {};
@@ -88,9 +81,6 @@
 
   sections.forEach(function (section) { sectionObserver.observe(section); });
 
-  /* ------------------------------------------------------------------
-     Signature element: growing ivy vine tied to scroll depth
-     ------------------------------------------------------------------ */
   var vinePath = document.getElementById('vinePath');
   var vineLength = 0;
   if (vinePath && !reduceMotion) {
@@ -106,9 +96,6 @@
     vinePath.style.strokeDashoffset = String(vineLength * (1 - progress));
   }
 
-  /* ------------------------------------------------------------------
-     Floating CTA visibility (appears once past the hero)
-     ------------------------------------------------------------------ */
   var floatingCta = document.getElementById('floatingCta');
   var heroSection = document.getElementById('home');
 
@@ -121,24 +108,267 @@
     }
   }
 
-  var scrollTicking = false;
   window.addEventListener('scroll', function () {
-    if (!scrollTicking) {
-      window.requestAnimationFrame(function () {
-        handleNavShadow();
-        updateVine();
-        updateFloatingCta();
-        scrollTicking = false;
-      });
-      scrollTicking = true;
-    }
+    window.requestAnimationFrame(function () {
+      handleNavShadow();
+      updateVine();
+      updateFloatingCta();
+    });
   });
-  handleNavShadow();
-  updateVine();
-  updateFloatingCta();
 
   /* ------------------------------------------------------------------
-     Blog "read more" expand toggles
+     4. Before & After Projects (Data Store & Rendering)
+     ------------------------------------------------------------------ */
+  var DEFAULT_PROJECTS = [
+    {
+      id: 1,
+      title: "South Surrey Full Lawn Revival",
+      category: "Sod Installation",
+      before: "https://images.unsplash.com/photo-1557429287-b2e26467fc2b?q=80&w=800&auto=format&fit=crop",
+      after: "blog-lawn.jpg"
+    },
+    {
+      id: 2,
+      title: "Crescent Beach Privacy Hedge Shaping",
+      category: "Hedge Trimming & Shaping",
+      before: "https://images.unsplash.com/photo-1584467735815-f778f274e296?q=80&w=800&auto=format&fit=crop",
+      after: "blog-hedge.jpg"
+    },
+    {
+      id: 3,
+      title: "Morgan Creek Winter Garden Prep",
+      category: "Garden Planting & Cleanups",
+      before: "https://images.unsplash.com/photo-1508873696983-2df5293cb32b?q=80&w=800&auto=format&fit=crop",
+      after: "blog-winter.jpg"
+    }
+  ];
+
+  function getProjects() {
+    try {
+      var saved = localStorage.getItem('hh_ivy_projects');
+      return saved ? JSON.parse(saved) : DEFAULT_PROJECTS;
+    } catch (e) {
+      return DEFAULT_PROJECTS;
+    }
+  }
+
+  function saveProjects(projects) {
+    try {
+      localStorage.setItem('hh_ivy_projects', JSON.stringify(projects));
+    } catch (e) {}
+  }
+
+  var galleryGrid = document.getElementById('galleryGrid');
+
+  function renderGallery() {
+    var projects = getProjects();
+    galleryGrid.innerHTML = '';
+
+    projects.forEach(function (proj) {
+      var card = document.createElement('article');
+      card.className = 'project-card';
+      card.innerHTML = 
+        '<div class="project-card-thumb">' +
+          '<img src="' + proj.after + '" alt="' + proj.title + '" loading="lazy">' +
+          '<div class="project-badge-split"><span>Before</span> / <span>After</span></div>' +
+        '</div>' +
+        '<div class="project-card-info">' +
+          '<span class="project-tag">' + proj.category + '</span>' +
+          '<h3>' + proj.title + '</h3>' +
+          '<span class="project-view-cta">Interactive Slider &rarr;</span>' +
+        '</div>';
+
+      card.addEventListener('click', function () {
+        openSliderModal(proj);
+      });
+
+      galleryGrid.appendChild(card);
+    });
+  }
+  renderGallery();
+
+  /* ------------------------------------------------------------------
+     5. Interactive Comparison Slider Modal Logic
+     ------------------------------------------------------------------ */
+  var sliderModal = document.getElementById('sliderModal');
+  var sliderModalClose = document.getElementById('sliderModalClose');
+  var compImgAfter = document.getElementById('compImgAfter');
+  var compImgBefore = document.getElementById('compImgBefore');
+  var compBeforeWrapper = document.getElementById('compBeforeWrapper');
+  var compHandle = document.getElementById('compHandle');
+  var compContainer = document.getElementById('comparisonContainer');
+  var sliderProjectTitle = document.getElementById('sliderProjectTitle');
+  var sliderProjectCategory = document.getElementById('sliderProjectCategory');
+
+  function openSliderModal(proj) {
+    sliderProjectTitle.textContent = proj.title;
+    sliderProjectCategory.textContent = proj.category;
+    compImgBefore.src = proj.before;
+    compImgAfter.src = proj.after;
+
+    // Reset slider to 50%
+    setSliderPosition(50);
+
+    sliderModal.classList.add('open');
+    sliderModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSliderModal() {
+    sliderModal.classList.remove('open');
+    sliderModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  sliderModalClose.addEventListener('click', closeSliderModal);
+  sliderModal.addEventListener('click', function (e) {
+    if (e.target === sliderModal) closeSliderModal();
+  });
+
+  function setSliderPosition(percentage) {
+    var p = Math.max(0, Math.min(100, percentage));
+    compBeforeWrapper.style.width = p + '%';
+    compHandle.style.left = p + '%';
+  }
+
+  var isSliding = false;
+
+  function handleSliderMove(e) {
+    if (!isSliding) return;
+    var rect = compContainer.getBoundingClientRect();
+    var clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    var position = ((clientX - rect.left) / rect.width) * 100;
+    setSliderPosition(position);
+  }
+
+  compContainer.addEventListener('mousedown', function (e) { isSliding = true; handleSliderMove(e); });
+  compContainer.addEventListener('touchstart', function (e) { isSliding = true; handleSliderMove(e); });
+  window.addEventListener('mousemove', handleSliderMove);
+  window.addEventListener('touchmove', handleSliderMove);
+  window.addEventListener('mouseup', function () { isSliding = false; });
+  window.addEventListener('touchend', function () { isSliding = false; });
+
+  /* ------------------------------------------------------------------
+     6. Client Admin Portal Logic (Passcode Protected)
+     ------------------------------------------------------------------ */
+  var ADMIN_PASS = 'ivy1993'; // Passcode for your client
+  var adminModal = document.getElementById('adminModal');
+  var openAdminBtn = document.getElementById('openAdminBtn');
+  var footerAdminLink = document.getElementById('footerAdminLink');
+  var adminModalClose = document.getElementById('adminModalClose');
+  var adminLoginForm = document.getElementById('adminLoginForm');
+  var adminLoginView = document.getElementById('adminLoginView');
+  var adminDashboardView = document.getElementById('adminDashboardView');
+  var adminLoginErr = document.getElementById('adminLoginErr');
+  var adminLogoutBtn = document.getElementById('adminLogoutBtn');
+  var addProjectForm = document.getElementById('addProjectForm');
+  var adminProjectsListWrap = document.getElementById('adminProjectsListWrap');
+
+  function openAdminModal() {
+    adminModal.classList.add('open');
+    adminModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeAdminModal() {
+    adminModal.classList.remove('open');
+    adminModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  openAdminBtn.addEventListener('click', openAdminModal);
+  footerAdminLink.addEventListener('click', function(e) { e.preventDefault(); openAdminModal(); });
+  adminModalClose.addEventListener('click', closeAdminModal);
+  adminModal.addEventListener('click', function(e) { if (e.target === adminModal) closeAdminModal(); });
+
+  adminLoginForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var entered = document.getElementById('adminPass').value;
+    if (entered === ADMIN_PASS) {
+      adminLoginErr.textContent = '';
+      adminLoginView.hidden = true;
+      adminDashboardView.hidden = false;
+      renderAdminProjectList();
+    } else {
+      adminLoginErr.textContent = 'Incorrect passcode. Please try again.';
+    }
+  });
+
+  adminLogoutBtn.addEventListener('click', function () {
+    adminDashboardView.hidden = true;
+    adminLoginView.hidden = false;
+    adminLoginForm.reset();
+  });
+
+  function renderAdminProjectList() {
+    var projects = getProjects();
+    adminProjectsListWrap.innerHTML = '';
+
+    projects.forEach(function (proj) {
+      var item = document.createElement('div');
+      item.className = 'admin-item-row';
+      item.innerHTML = 
+        '<div class="admin-item-info">' +
+          '<img src="' + proj.after + '" class="admin-item-thumb" alt="">' +
+          '<div><strong>' + proj.title + '</strong><br><small style="color:var(--ink-soft);">' + proj.category + '</small></div>' +
+        '</div>' +
+        '<button class="admin-delete-btn" data-id="' + proj.id + '">Delete</button>';
+
+      item.querySelector('.admin-delete-btn').addEventListener('click', function () {
+        var updated = projects.filter(function (p) { return p.id !== proj.id; });
+        saveProjects(updated);
+        renderAdminProjectList();
+        renderGallery();
+      });
+
+      adminProjectsListWrap.appendChild(item);
+    });
+  }
+
+  function fileToBase64(file) {
+    return new Promise(function(resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function() { resolve(reader.result); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  addProjectForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var title = document.getElementById('projTitle').value.trim();
+    var category = document.getElementById('projCategory').value;
+    var beforeFile = document.getElementById('projBeforeImg').files[0];
+    var afterFile = document.getElementById('projAfterImg').files[0];
+
+    if (!beforeFile || !afterFile) {
+      alert('Please select both Before and After photos.');
+      return;
+    }
+
+    var beforeB64 = await fileToBase64(beforeFile);
+    var afterB64 = await fileToBase64(afterFile);
+
+    var newProject = {
+      id: Date.now(),
+      title: title,
+      category: category,
+      before: beforeB64,
+      after: afterB64
+    };
+
+    var current = getProjects();
+    current.unshift(newProject);
+    saveProjects(current);
+
+    addProjectForm.reset();
+    renderAdminProjectList();
+    renderGallery();
+    alert('Project published successfully to your live website gallery!');
+  });
+
+  /* ------------------------------------------------------------------
+     7. Blog "Read More" Toggle
      ------------------------------------------------------------------ */
   Array.prototype.forEach.call(document.querySelectorAll('.blog-toggle'), function (btn) {
     btn.addEventListener('click', function () {
@@ -152,211 +382,68 @@
   });
 
   /* ------------------------------------------------------------------
-     Quote modal controller
+     8. Quote Form Submissions (Web3Forms)
      ------------------------------------------------------------------ */
-  var modal = document.getElementById('quoteModal');
-  var modalClose = document.getElementById('modalClose');
-  var modalFormWrap = document.getElementById('modalFormWrap');
-  var modalSuccess = document.getElementById('modalSuccess');
-  var modalDoneBtn = document.getElementById('modalDoneBtn');
+  var quoteModal = document.getElementById('quoteModal');
+  var quoteModalClose = document.getElementById('modalClose');
   var quoteForm = document.getElementById('quoteForm');
+  var modalSuccess = document.getElementById('modalSuccess');
+  var modalFormWrap = document.getElementById('modalFormWrap');
+  var modalDoneBtn = document.getElementById('modalDoneBtn');
   var serviceSelect = document.getElementById('q-service');
   var dateInput = document.getElementById('q-date');
-  var lastFocusedEl = null;
 
-  // Prevent picking a date in the past
   (function setMinDate() {
     var today = new Date();
-    var yyyy = today.getFullYear();
-    var mm = String(today.getMonth() + 1).padStart(2, '0');
-    var dd = String(today.getDate()).padStart(2, '0');
-    dateInput.setAttribute('min', yyyy + '-' + mm + '-' + dd);
+    dateInput.setAttribute('min', today.toISOString().split('T')[0]);
   })();
 
-  function openModal(triggerEl) {
-    lastFocusedEl = document.activeElement;
-
-    // Pre-select service if opened from a service card's micro-CTA
-    var presetService = triggerEl && triggerEl.getAttribute('data-service');
-    if (presetService) {
+  function openQuoteModal(triggerEl) {
+    var preset = triggerEl && triggerEl.getAttribute('data-service');
+    if (preset) {
       Array.prototype.forEach.call(serviceSelect.options, function (opt) {
-        if (opt.value === presetService || opt.text === presetService) {
-          serviceSelect.value = opt.value || opt.text;
-        }
+        if (opt.value === preset || opt.text === preset) serviceSelect.value = opt.value || opt.text;
       });
     }
-
-    modal.classList.add('open');
-    modal.setAttribute('aria-hidden', 'false');
+    quoteModal.classList.add('open');
+    quoteModal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
-
-    // Focus the first field for keyboard users
-    window.setTimeout(function () {
-      var firstField = document.getElementById('q-name');
-      if (firstField) firstField.focus();
-    }, 250);
   }
 
-  function closeModal() {
-    modal.classList.remove('open');
-    modal.setAttribute('aria-hidden', 'true');
+  function closeQuoteModal() {
+    quoteModal.classList.remove('open');
+    quoteModal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
-    if (lastFocusedEl) lastFocusedEl.focus();
-
-    // Reset to the form view after the close transition finishes
-    window.setTimeout(function () {
+    setTimeout(function () {
       modalSuccess.hidden = true;
       modalFormWrap.hidden = false;
-      resetForm();
+      quoteForm.reset();
     }, 400);
   }
 
   Array.prototype.forEach.call(document.querySelectorAll('[data-open-modal]'), function (trigger) {
-    trigger.addEventListener('click', function () { openModal(trigger); });
+    trigger.addEventListener('click', function () { openQuoteModal(trigger); });
   });
 
-  modalClose.addEventListener('click', closeModal);
-  modalDoneBtn.addEventListener('click', closeModal);
-
-  modal.addEventListener('click', function (e) {
-    if (e.target === modal) closeModal();
-  });
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
-  });
-
-  // Basic focus trap while modal is open
-  modal.addEventListener('keydown', function (e) {
-    if (e.key !== 'Tab' || !modal.classList.contains('open')) return;
-    var focusable = modal.querySelectorAll('button, input, select, textarea, a[href]');
-    if (!focusable.length) return;
-    var first = focusable[0];
-    var last = focusable[focusable.length - 1];
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
-    }
-  });
-
-  /* ------------------------------------------------------------------
-     Form validation & submission
-     ------------------------------------------------------------------ */
-  var fieldMessages = {
-    name: 'Please enter your full name.',
-    email: 'Please enter a valid email address.',
-    phone: 'A phone number is required so we can reach you.',
-    city: 'Please select your city or area.',
-    service: 'Please select the service you need.',
-    date: 'Please choose a preferred date.',
-    time: 'Please choose a preferred time.'
-  };
-
-  function setFieldError(fieldName, message) {
-    var input = document.getElementById('q-' + fieldName);
-    var errorEl = document.getElementById('err-' + fieldName);
-    var row = input.closest('.form-row');
-    row.classList.add('has-error');
-    errorEl.textContent = message || '';
-  }
-
-  function clearFieldError(fieldName) {
-    var input = document.getElementById('q-' + fieldName);
-    var errorEl = document.getElementById('err-' + fieldName);
-    var row = input.closest('.form-row');
-    row.classList.remove('has-error');
-    errorEl.textContent = '';
-  }
-
-  function isValidEmail(value) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-  }
-
-  function isValidPhone(value) {
-    var digits = value.replace(/\D/g, '');
-    return digits.length >= 10;
-  }
-
-  function validateForm() {
-    var data = {
-      name: document.getElementById('q-name').value.trim(),
-      email: document.getElementById('q-email').value.trim(),
-      phone: document.getElementById('q-phone').value.trim(),
-      city: document.getElementById('q-city').value,
-      service: document.getElementById('q-service').value,
-      description: document.getElementById('q-description').value.trim(),
-      date: document.getElementById('q-date').value,
-      time: document.getElementById('q-time').value
-    };
-
-    var firstInvalidField = null;
-    var isValid = true;
-
-    Object.keys(data).forEach(function (key) { clearFieldError(key); });
-
-    if (!data.name) { setFieldError('name', fieldMessages.name); isValid = false; firstInvalidField = firstInvalidField || 'name'; }
-    if (!data.email || !isValidEmail(data.email)) { setFieldError('email', fieldMessages.email); isValid = false; firstInvalidField = firstInvalidField || 'email'; }
-    if (!data.phone || !isValidPhone(data.phone)) { setFieldError('phone', fieldMessages.phone); isValid = false; firstInvalidField = firstInvalidField || 'phone'; }
-    if (!data.city) { setFieldError('city', fieldMessages.city); isValid = false; firstInvalidField = firstInvalidField || 'city'; }
-    if (!data.service) { setFieldError('service', fieldMessages.service); isValid = false; firstInvalidField = firstInvalidField || 'service'; }
-    // Project description is optional — no validation required
-    if (!data.date) { setFieldError('date', fieldMessages.date); isValid = false; firstInvalidField = firstInvalidField || 'date'; }
-    if (!data.time) { setFieldError('time', fieldMessages.time); isValid = false; firstInvalidField = firstInvalidField || 'time'; }
-
-    return { isValid: isValid, data: data, firstInvalidField: firstInvalidField };
-  }
-
-  // Clear a field's error as soon as the visitor starts fixing it
-  ['name', 'email', 'phone', 'city', 'service', 'description', 'date', 'time'].forEach(function (key) {
-    var input = document.getElementById('q-' + key);
-    input.addEventListener('input', function () { clearFieldError(key); });
-    input.addEventListener('change', function () { clearFieldError(key); });
-  });
-
-  function resetForm() {
-    quoteForm.reset();
-    ['name', 'email', 'phone', 'city', 'service', 'description', 'date', 'time'].forEach(clearFieldError);
-  }
+  quoteModalClose.addEventListener('click', closeQuoteModal);
+  modalDoneBtn.addEventListener('click', closeQuoteModal);
+  quoteModal.addEventListener('click', function(e) { if (e.target === quoteModal) closeQuoteModal(); });
 
   quoteForm.addEventListener('submit', function (e) {
     e.preventDefault();
-    var result = validateForm();
-
-    if (!result.isValid) {
-      var invalidInput = document.getElementById('q-' + result.firstInvalidField);
-      if (invalidInput) invalidInput.focus();
-      return;
-    }
-
-   // Submit form data asynchronously to Web3Forms
     var formData = new FormData(quoteForm);
-
     fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       body: formData
-    })
-    .then(function(response) {
-      if (response.ok) {
-        var successMessageEl = document.getElementById('successMessage');
-        var firstName = result.data.name.split(' ')[0];
-        successMessageEl.textContent = 'Thank you, ' + firstName + '!';
-
-        var successCheck = modalSuccess.querySelector('.success-check');
-        successCheck.innerHTML = successCheck.innerHTML;
-
+    }).then(function(res) {
+      if (res.ok) {
         modalFormWrap.hidden = true;
         modalSuccess.hidden = false;
-        var doneBtn = document.getElementById('modalDoneBtn');
-        if (doneBtn) doneBtn.focus();
       } else {
         alert('There was an error submitting your request. Please try again.');
       }
-    })
-    .catch(function(error) {
-      alert('Network error. Please try again or call us directly.');
+    }).catch(function() {
+      alert('Network error. Please try again.');
     });
   });
 

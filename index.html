@@ -84,6 +84,7 @@
     <nav class="nav-links" id="navLinks">
       <a href="#home" class="nav-link" data-section="home">Home</a>
       <a href="#services" class="nav-link" data-section="services">Services</a>
+      <a href="#gallery" class="nav-link" data-section="gallery">Projects</a>
       <a href="#about" class="nav-link" data-section="about">About</a>
       <a href="#blog" class="nav-link" data-section="blog">Blog</a>
     </nav>
@@ -240,7 +241,6 @@
           <button class="service-cta" data-open-modal data-service="Tree Pruning">Get a Free Quote <span aria-hidden="true">→</span></button>
         </article>
 
-        <!-- NEW SERVICE 1: Sod Installation -->
         <article class="service-card">
           <div class="service-icon" aria-hidden="true">
             <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -254,7 +254,6 @@
           <button class="service-cta" data-open-modal data-service="Sod Installation">Get a Free Quote <span aria-hidden="true">→</span></button>
         </article>
 
-        <!-- NEW SERVICE 2: Pressure Wash -->
         <article class="service-card">
           <div class="service-icon" aria-hidden="true">
             <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -271,6 +270,28 @@
           <button class="service-cta" data-open-modal data-service="Pressure Wash">Get a Free Quote <span aria-hidden="true">→</span></button>
         </article>
 
+      </div>
+    </div>
+  </section>
+
+  <!-- BEFORE & AFTER GALLERY SECTION -->
+  <section id="gallery" class="gallery">
+    <div class="section-inner">
+      <div class="gallery-header">
+        <div>
+          <p class="eyebrow">Proven Results</p>
+          <h2>Before &amp; After Transformations</h2>
+          <p class="section-sub">Explore our recent client projects across Surrey. Click on any card to interact with the side-by-side comparison slider.</p>
+        </div>
+        <button class="btn btn-ghost btn-sm admin-trigger-btn" id="openAdminBtn" title="Client Admin Portal">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>Manage Projects</span>
+        </button>
+      </div>
+
+      <!-- Projects Grid (Dynamically Populated) -->
+      <div class="gallery-grid" id="galleryGrid">
+        <!-- Rendered via JavaScript -->
       </div>
     </div>
   </section>
@@ -303,7 +324,7 @@
     </div>
   </section>
 
-<!-- BLOG -->
+  <!-- BLOG -->
   <section id="blog" class="blog">
     <div class="section-inner">
       <p class="eyebrow">Field Notes</p>
@@ -312,7 +333,6 @@
 
       <div class="blog-grid">
 
-        <!-- Blog 1: Striped Lawn & Pathway -->
         <article class="blog-card">
           <div class="blog-img">
             <img src="blog-lawn.jpg" alt="Pristine striped green lawn with landscaped garden borders" loading="lazy">
@@ -325,7 +345,6 @@
           </div>
         </article>
 
-        <!-- Blog 2: Frosted Evergreen Winter Garden -->
         <article class="blog-card">
           <div class="blog-img">
             <img src="blog-winter.jpg" alt="Frost-covered sculpted evergreen shrubs in winter" loading="lazy">
@@ -338,7 +357,6 @@
           </div>
         </article>
 
-        <!-- Blog 3: Stone Pathway & Clean Trimmed Hedges -->
         <article class="blog-card">
           <div class="blog-img">
             <img src="blog-hedge.jpg" alt="Paved stone path framed by trimmed privacy hedges" loading="lazy">
@@ -370,8 +388,10 @@
     <nav class="footer-links" aria-label="Footer">
       <a href="#home">Home</a>
       <a href="#services">Services</a>
+      <a href="#gallery">Projects</a>
       <a href="#about">About</a>
       <a href="#blog">Blog</a>
+      <a href="#" id="footerAdminLink" style="color:var(--ivy-emerald); font-weight:600; margin-top:8px;">Admin Portal 🔒</a>
     </nav>
     <div class="footer-contact">
       <a href="tel:+16723995554">(672) 399-5554</a>
@@ -391,6 +411,112 @@
   <img src="logo.jpg" alt="" class="cta-logo-icon">
   <span>Request a Free Quote</span>
 </button>
+
+<!-- POPUP BEFORE & AFTER COMPARISON SLIDER MODAL -->
+<div class="modal-overlay" id="sliderModal" aria-hidden="true">
+  <div class="modal-card slider-modal-card" role="dialog" aria-modal="true" aria-labelledby="sliderProjectTitle">
+    <button class="modal-close" id="sliderModalClose" aria-label="Close dialog">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l16 16M20 4L4 20"/></svg>
+    </button>
+    <div class="slider-modal-header">
+      <p class="eyebrow" id="sliderProjectCategory">Project Showcase</p>
+      <h3 id="sliderProjectTitle">Transformation View</h3>
+      <p class="modal-sub">Drag the center slider left or right to compare Before and After results.</p>
+    </div>
+
+    <!-- The Draggable Comparison Canvas -->
+    <div class="comparison-container" id="comparisonContainer">
+      <img src="" alt="After Project" class="comp-img comp-after" id="compImgAfter">
+      <div class="comp-before-wrapper" id="compBeforeWrapper">
+        <img src="" alt="Before Project" class="comp-img comp-before" id="compImgBefore">
+      </div>
+      <div class="comp-handle" id="compHandle">
+        <div class="comp-handle-line"></div>
+        <div class="comp-handle-button">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+            <polyline points="9 18 3 12 9 6"></polyline>
+          </svg>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+            <polyline points="15 18 21 12 15 6"></polyline>
+          </svg>
+        </div>
+      </div>
+      <span class="comp-badge comp-badge-before">BEFORE</span>
+      <span class="comp-badge comp-badge-after">AFTER</span>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENT ADMIN PORTAL MODAL -->
+<div class="modal-overlay" id="adminModal" aria-hidden="true">
+  <div class="modal-card admin-modal-card" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+    <button class="modal-close" id="adminModalClose" aria-label="Close dialog">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l16 16M20 4L4 20"/></svg>
+    </button>
+
+    <!-- Admin Login Screen -->
+    <div id="adminLoginView">
+      <p class="eyebrow">Owner Access</p>
+      <h3 id="adminTitle">Admin Login</h3>
+      <p class="modal-sub">Log in to add, edit, or remove your Before &amp; After project showcase items.</p>
+      <form id="adminLoginForm">
+        <div class="form-row">
+          <label for="adminPass">Admin Password</label>
+          <input type="password" id="adminPass" placeholder="Enter owner passcode" required autocomplete="current-password">
+          <span class="field-error" id="adminLoginErr"></span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-glow btn-block">Log In</button>
+      </form>
+    </div>
+
+    <!-- Admin Dashboard (Shown upon successful login) -->
+    <div id="adminDashboardView" hidden>
+      <div class="admin-dash-header">
+        <div>
+          <p class="eyebrow">Project Manager</p>
+          <h3>Add New Project</h3>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="adminLogoutBtn">Sign Out</button>
+      </div>
+
+      <form id="addProjectForm">
+        <div class="form-row">
+          <label for="projTitle">Project Title</label>
+          <input type="text" id="projTitle" placeholder="e.g., South Surrey Sod Replacement" required>
+        </div>
+        <div class="form-row">
+          <label for="projCategory">Category / Service</label>
+          <select id="projCategory" required>
+            <option>Lawn Mowing &amp; Edging</option>
+            <option>Sod Installation</option>
+            <option>Hedge Trimming &amp; Shaping</option>
+            <option>Pressure Washing</option>
+            <option>Aeration &amp; Power Raking</option>
+            <option>Garden Planting &amp; Cleanups</option>
+          </select>
+        </div>
+        <div class="form-row-group">
+          <div class="form-row">
+            <label for="projBeforeImg">"Before" Photo</label>
+            <input type="file" id="projBeforeImg" accept="image/*" required>
+          </div>
+          <div class="form-row">
+            <label for="projAfterImg">"After" Photo</label>
+            <input type="file" id="projAfterImg" accept="image/*" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-glow btn-block">Publish Project</button>
+      </form>
+
+      <div class="admin-project-list">
+        <h4 style="margin:24px 0 12px; font-size:16px;">Existing Published Projects</h4>
+        <div id="adminProjectsListWrap"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Quote Modal -->
 <div class="modal-overlay" id="quoteModal" aria-hidden="true">
