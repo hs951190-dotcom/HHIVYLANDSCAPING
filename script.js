@@ -317,7 +317,6 @@
     adminModal.addEventListener('click', function(e) { if (e.target === adminModal) closeAdminModal(); });
   }
 
-  // Handle Authenticated Admin Login
   if (adminLoginForm) {
     adminLoginForm.addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -347,7 +346,6 @@
     });
   }
 
-  // Handle Admin Logout
   if (adminLogoutBtn) {
     adminLogoutBtn.addEventListener('click', async function () {
       await supabase.auth.signOut();
@@ -357,7 +355,6 @@
     });
   }
 
-  // Render Admin Project Management List
   async function renderAdminProjectList() {
     if (!adminProjectsListWrap) return;
     adminProjectsListWrap.innerHTML = '<p style="font-size:13px; color:var(--ink-soft);">Loading records...</p>';
@@ -398,7 +395,6 @@
     });
   }
 
-  // Secure Add Project Action
   if (addProjectForm) {
     addProjectForm.addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -723,7 +719,7 @@
     revealObserver.observe(el);
   });
 
-  // C. Interactive 3D Card Tilt on Hover (Desktop)
+  // C. Interactive 3D Card Tilt on Hover
   if (!reduceMotion && window.innerWidth > 960) {
     var tiltCards = document.querySelectorAll('.service-card, .project-card, .blog-card');
     tiltCards.forEach(function(card) {
