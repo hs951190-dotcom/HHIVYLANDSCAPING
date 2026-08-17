@@ -1,653 +1,827 @@
-<!DOCTYPE html>
-<html lang="en-CA">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>H&amp;H Ivy Landscaping | Lawn &amp; Garden Care in Surrey, BC Since 1993</title>
-<meta name="description" content="Residential &amp; commercial lawn and garden maintenance serving Surrey, Delta, White Rock, Langley &amp; the Greater Vancouver area since 1993. Mowing, hedge trimming, aeration, sod installation, pressure washing &amp; more. Call for a free quote.">
-<meta name="keywords" content="Surrey lawn care, landscaping Surrey BC, hedge trimming Surrey, lawn mowing Delta, aeration White Rock, sod installation Surrey, pressure washing Surrey, weed control Langley, tree pruning Surrey, commercial lawn maintenance">
-<meta name="robots" content="index, follow">
-<link rel="canonical" href="https://www.hhivylandscaping.com/">
-<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
-<meta name="geo.region" content="CA-BC">
-<meta name="geo.placename" content="Surrey">
-<meta name="theme-color" content="#121B03">
-<script>
-  (function () {
-    try {
-      var stored = localStorage.getItem('hh-ivy-theme');
-      var theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', theme);
-    } catch (e) {}
-  })();
-</script>
+/* ==========================================================================
+   H&H IVY LANDSCAPING — Site Interactions, Cloud Gallery & Admin Portal
+   ========================================================================== */
+(function () {
+  'use strict';
 
-<!-- Open Graph / local SEO -->
-<meta property="og:type" content="business.business">
-<meta property="og:title" content="H&amp;H Ivy Landscaping | Lawn &amp; Garden Care in Surrey, BC Since 1993">
-<meta property="og:description" content="You grow, we mow. Residential &amp; commercial lawn and garden care across Surrey &amp; the Greater Vancouver area. Call for a free quote.">
-<meta property="og:image" content="logo.jpg">
-<meta property="og:locale" content="en_CA">
-<meta property="og:url" content="https://www.hhivylandscaping.com/">
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-<link rel="icon" href="logo.jpg" type="image/jpeg">
+  /* ------------------------------------------------------------------
+     1. Dark Mode Toggle
+     ------------------------------------------------------------------ */
+  var themeToggle = document.getElementById('themeToggle');
+  var THEME_KEY = 'hh-ivy-theme';
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    if (themeToggle) themeToggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+  }
 
-<link rel="stylesheet" href="style.css">
+  function storeTheme(theme) {
+    try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+  }
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "HomeAndConstructionBusiness",
-  "name": "H&H Ivy Landscaping Ltd.",
-  "image": "https://www.hhivylandscaping.com/logo.jpg",
-  "description": "Residential and commercial lawn and garden maintenance company serving Surrey, BC and the surrounding Greater Vancouver area since 1993.",
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "Surrey",
-    "addressRegion": "BC",
-    "addressCountry": "CA"
-  },
-  "areaServed": ["Surrey", "Delta", "White Rock", "Langley", "Greater Vancouver"],
-  "telephone": "+1-672-399-5554",
-  "email": "landscape.hhivy@gmail.com",
-  "url": "https://www.hhivylandscaping.com/",
-  "sameAs": ["https://www.instagram.com/h.h_ivy_landscaping"],
-  "foundingDate": "1993",
-  "priceRange": "Free Estimates"
-}
-</script>
-</head>
-<body>
+  if (themeToggle) {
+    applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+    themeToggle.addEventListener('click', function () {
+      var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      storeTheme(next);
+    });
+  }
 
-<!-- Live Surrey Weather & Seasonal Turf Advisory Banner -->
-<div class="weather-banner" id="weatherBanner">
-  <div class="section-inner weather-banner-inner">
-    <div class="weather-info">
-      <span class="weather-badge" id="weatherPill">
-        <span class="weather-dot"></span>
-        <span id="weatherTemp">Surrey, BC</span>
-      </span>
-      <span class="weather-text" id="weatherMsg">
-        Spring turf schedule active: Booking aeration &amp; power raking slots across Surrey!
-      </span>
-    </div>
-    <div class="weather-actions">
-      <button class="weather-cta" data-open-modal>Book Slot &rarr;</button>
-      <button class="weather-close" id="closeWeatherBtn" aria-label="Dismiss banner">&times;</button>
-    </div>
-  </div>
-</div>
+  /* ------------------------------------------------------------------
+     2. Sticky Nav & Mobile Menu
+     ------------------------------------------------------------------ */
+  var siteNav = document.getElementById('siteNav');
+  function handleNavShadow() {
+    if (window.scrollY > 12) {
+      siteNav.classList.add('scrolled');
+    } else {
+      siteNav.classList.remove('scrolled');
+    }
+  }
 
-<!-- Growing Ivy Vine Background Element -->
-<svg class="ivy-vine" id="ivyVine" viewBox="0 0 120 2600" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-  <defs>
-    <linearGradient id="vineGradient" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#E3EEE2"/>
-      <stop offset="100%" stop-color="#1F3A18"/>
-    </linearGradient>
-  </defs>
-  <path id="vinePath" d="M60 0 C 15 140, 105 280, 60 430 S 10 680, 60 830 S 112 1080, 58 1240 S 8 1480, 60 1640 S 110 1880, 58 2040 S 12 2280, 60 2440 S 60 2560, 60 2600" fill="none" stroke="url(#vineGradient)" stroke-width="3" stroke-linecap="round"/>
-</svg>
+  var navToggle = document.getElementById('navToggle');
+  var navLinks = document.getElementById('navLinks');
 
-<a class="skip-link" href="#home">Skip to content</a>
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', function () {
+      var isOpen = navLinks.classList.toggle('open');
+      navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
 
-<header class="site-nav" id="siteNav">
-  <div class="nav-inner">
-    <a href="#home" class="nav-logo">
-      <img src="logo.jpg" alt="H&amp;H Ivy Landscaping Logo" class="brand-logo-img" width="34" height="34">
-      <span>H&amp;H Ivy Landscaping</span>
-    </a>
-    <nav class="nav-links" id="navLinks">
-      <a href="#home" class="nav-link" data-section="home">Home</a>
-      <a href="#services" class="nav-link" data-section="services">Services</a>
-      <a href="#gallery" class="nav-link" data-section="gallery">Projects</a>
-      <a href="#about" class="nav-link" data-section="about">About</a>
-      <a href="#blog" class="nav-link" data-section="blog">Blog</a>
-    </nav>
-    <div class="nav-actions">
-      <a href="tel:+16723995554" class="nav-phone">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        <span>(672) 399-5554</span>
-      </a>
-      <button class="btn btn-primary btn-glow nav-cta" data-open-modal>Request a Free Quote</button>
-      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" aria-pressed="false">
-        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="4.5"/>
-          <path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/>
-        </svg>
-        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/>
-        </svg>
-      </button>
-      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </div>
-</header>
+    Array.prototype.forEach.call(navLinks.querySelectorAll('.nav-link'), function (link) {
+      link.addEventListener('click', function () {
+        navLinks.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
 
-<main>
+  /* ------------------------------------------------------------------
+     3. Active Section Spy & Ivy Vine Scroll
+     ------------------------------------------------------------------ */
+  var sections = document.querySelectorAll('main section[id]');
+  var navLinkMap = {};
+  if (navLinks) {
+    Array.prototype.forEach.call(navLinks.querySelectorAll('.nav-link'), function (link) {
+      navLinkMap[link.dataset.section] = link;
+    });
+  }
 
-  <!-- HOME / HERO -->
-  <section id="home" class="hero">
-    <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1558904541-efa843a96f01?q=80&w=2000&auto=format&fit=crop')"></div>
-    <div class="hero-overlay"></div>
-    <canvas id="ivyLeafCanvas" class="hero-leaf-canvas"></canvas>
-    <div class="hero-content">
-      <p class="eyebrow eyebrow-light">Serving Surrey, BC &amp; the Greater Vancouver Area Since 1993</p>
-      <h1>You Grow, We Mow.</h1>
-      <p class="hero-sub">Trusted lawn and garden care for homes and businesses across Surrey — mowing, hedge trimming, aeration, sod installation, pressure washing, and more, backed by a free, no-obligation quote.</p>
-      <div class="hero-actions">
-        <button class="btn btn-primary btn-glow btn-lg" data-open-modal>Request a Free Quote</button>
-        <a href="#services" class="btn btn-ghost btn-lg">See Our Services</a>
-      </div>
-      <p class="scope-badge">Residential &bull; Commercial</p>
-      <div class="hero-trust">
-        <div class="trust-item"><span class="trust-num" data-count="33">0</span><span class="trust-num-suffix">+</span><span class="trust-label">Years Serving BC</span></div>
-        <div class="trust-item"><span class="trust-num">Free</span><span class="trust-label">No-Obligation Quotes</span></div>
-        <div class="trust-item"><span class="trust-num" data-count="10">0</span><span class="trust-label">Core Services Offered</span></div>
-      </div>
-    </div>
-    <a href="#services" class="scroll-cue" aria-label="Scroll to services"><span></span></a>
-  </section>
+  var sectionObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      var link = navLinkMap[entry.target.id];
+      if (!link) return;
+      if (entry.isIntersecting) {
+        Array.prototype.forEach.call(navLinks.querySelectorAll('.nav-link'), function (l) {
+          l.classList.remove('active');
+        });
+        link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
 
-  <!-- SERVICES -->
-  <section id="services" class="services">
-    <div class="section-inner">
-      <p class="eyebrow">Residential &amp; Commercial</p>
-      <h2>Lawn Care &amp; Landscaping Services in Surrey, BC</h2>
-      <p class="section-sub">Everything your lawn and garden need to look great, all season long — no job too big or too small.</p>
+  sections.forEach(function (section) { sectionObserver.observe(section); });
 
-      <div class="services-grid">
+  var vinePath = document.getElementById('vinePath');
+  var vineLength = 0;
+  if (vinePath && !reduceMotion) {
+    vineLength = vinePath.getTotalLength();
+    vinePath.style.strokeDasharray = String(vineLength);
+    vinePath.style.strokeDashoffset = String(vineLength);
+  }
 
-        <article class="service-card">
-          <div class="service-icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="14" cy="36" r="5"/><circle cx="34" cy="36" r="5"/>
-              <path d="M10 30h28l-5-11H16z"/><path d="M30 19L40 8"/>
-            </svg>
-          </div>
-          <h3>Lawn Mowing</h3>
-          <p>Consistent, precision mowing on a schedule that keeps your lawn healthy and looking sharp all season.</p>
-          <button class="service-cta" data-open-modal data-service="Lawn Mowing">Get a Free Quote <span aria-hidden="true">→</span></button>
-        </article>
+  function updateVine() {
+    if (!vinePath || reduceMotion || !vineLength) return;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var progress = docHeight > 0 ? Math.min(window.scrollY / docHeight, 1) : 0;
+    vinePath.style.strokeDashoffset = String(vineLength * (1 - progress));
+  }
 
-        <article class="service-card">
-          <div class="service-icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M24 44V28"/><path d="M24 28c-7 0-9-7-9-7s5-4 9 1c4-5 9-1 9-1s-2 7-9 7Z"/>
-              <path d="M32 10c0 4-3 6-3 6s-3-2-3-6 3-6 3-6 3 2 3 6Z"/>
-            </svg>
-          </div>
-          <h3>Weed Control</h3>
-          <p>Targeted treatments that knock back weeds without damaging the lawn and plants around them.</p>
-          <button class="service-cta" data-open-modal data-service="Weed Control">Get a Free Quote <span aria-hidden="true">→</span></button>
-        </article>
+  var floatingCta = document.getElementById('floatingCta');
+  var heroSection = document.getElementById('home');
 
-        <article class="service-card">
-          <div class="service-icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="14" cy="12" r="5"/><circle cx="34" cy="12" r="5"/>
-              <path d="M17 15L40 40"/><path d="M31 15L8 40"/>
-            </svg>
-          </div>
-          <h3>Hedge Trimming</h3>
-          <p>Clean, even trims that keep hedges and shrubs shaped and healthy right through the season.</p>
-          <button class="service-cta" data-open-modal data-service="Hedge Trimming">Get a Free Quote <span aria-hidden="true">→</span></button>
-        </article>
+  function updateFloatingCta() {
+    if (!heroSection || !floatingCta) return;
+    var heroBottom = heroSection.getBoundingClientRect().bottom;
+    if (heroBottom < 0) {
+      floatingCta.classList.add('visible');
+    } else {
+      floatingCta.classList.remove('visible');
+    }
+  }
 
-        <article class="service-card">
-          <div class="service-icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M8 40h32"/><path d="M24 40V26"/>
-              <path d="M24 26c-6 0-8-6-8-6s4-4 8 0c4-4 8 0 8 0s-2 6-8 6Z"/>
-            </svg>
-          </div>
-          <h3>Planting</h3>
-          <p>New beds, shrubs, and seasonal colour planted and set up to actually thrive in our climate.</p>
-          <button class="service-cta" data-open-modal data-service="Planting">Get a Free Quote <span aria-hidden="true">→</span></button>
-        </article>
+  window.addEventListener('scroll', function () {
+    window.requestAnimationFrame(function () {
+      handleNavShadow();
+      updateVine();
+      updateFloatingCta();
+    });
+  });
 
-        <article class="service-card">
-          <div class="service-icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M6 40h36"/>
-              <path d="M14 34V22M24 34V18M34 34V26"/>
-              <circle cx="14" cy="34" r="2" fill="currentColor" stroke="none"/><circle cx="24" cy="34" r="2" fill="currentColor" stroke="none"/><circle cx="34" cy="34" r="2" fill="currentColor" stroke="none"/>
-            </svg>
-          </div>
-          <h3>Aeration</h3>
-          <p>Core aeration that relieves soil compaction so water, air, and nutrients reach the roots.</p>
-          <button class="service-cta" data-open-modal data-service="Aeration">Get a Free Quote <span aria-hidden="true">→</span></button>
-        </article>
+  /* ------------------------------------------------------------------
+     4. Supabase Client Configuration & Live Gallery
+     ------------------------------------------------------------------ */
+  var SUPABASE_URL = 'https://euogfaqjnwangdwugofa.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_RhZkeCtOfGAaKD-QJZVaxQ_6l5PAfgw';
+  var supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-        <article class="service-card">
-          <div class="service-icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 8h12l4 14H14z"/>
-              <circle cx="16" cy="34" r="1.8" fill="currentColor" stroke="none"/><circle cx="24" cy="38" r="1.8" fill="currentColor" stroke="none"/><circle cx="32" cy="34" r="1.8" fill="currentColor" stroke="none"/><circle cx="20" cy="44" r="1.4" fill="currentColor" stroke="none"/><circle cx="28" cy="44" r="1.4" fill="currentColor" stroke="none"/>
-            </svg>
-          </div>
-          <h3>Fertilization</h3>
-          <p>Season-timed feeding programs that build strong, deep-green turf from the ground up.</p>
-          <button class="service-cta" data-open-modal data-service="Fertilization">Get a Free Quote <span aria-hidden="true">→</span></button>
-        </article>
+  var galleryGrid = document.getElementById('galleryGrid');
 
-        <article class="service-card">
-          <div class="service-icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M24 44V14"/><path d="M10 14h28"/>
-              <path d="M12 14v10M18 14v10M24 14v10M30 14v10M36 14v10"/>
-            </svg>
-          </div>
-          <h3>Power Raking</h3>
-          <p>Dethatching that clears out dead growth and lets your lawn breathe and grow stronger.</p>
-          <button class="service-cta" data-open-modal data-service="Power Raking">Get a Free Quote <span aria-hidden="true">→</span></button>
-        </article>
+  async function fetchLiveProjects() {
+    if (!galleryGrid) return;
+    if (!supabase) {
+      galleryGrid.innerHTML = '<p style="color:var(--ink-soft); grid-column:1/-1; text-align:center;">Database loading...</p>';
+      return;
+    }
 
-        <article class="service-card">
-          <div class="service-icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M24 44V26"/>
-              <path d="M24 26c-10 0-14-8-10-16 4 4 8 2 10-2 2 4 6 2 10 2 4 8 0 16-10 16Z"/>
-              <path d="M32 12l5-5"/>
-            </svg>
-          </div>
-          <h3>Tree Pruning</h3>
-          <p>Careful pruning that keeps trees healthy, safe, and shaped the way you want them.</p>
-          <button class="service-cta" data-open-modal data-service="Tree Pruning">Get a Free Quote <span aria-hidden="true">→</span></button>
-        </article>
+    galleryGrid.innerHTML = '<p style="color:var(--ink-soft); grid-column:1/-1; text-align:center;">Loading latest projects...</p>';
 
-        <article class="service-card">
-          <div class="service-icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M8 18c0-4 4-8 10-8h16c4 0 6 3 6 7v10c0 4-4 8-10 8H14c-4 0-6-3-6-7V18Z"/>
-              <path d="M16 18c0-2 2-4 5-4h11c2 0 4 2 4 4v10c0 2-2 4-4 4H21c-3 0-5-2-5-4V18Z"/>
-              <path d="M6 38h36"/>
-            </svg>
-          </div>
-          <h3>Sod Installation</h3>
-          <p>Complete lawn replacement and premium fresh turf installation for an instant, vibrant green yard.</p>
-          <button class="service-cta" data-open-modal data-service="Sod Installation">Get a Free Quote <span aria-hidden="true">→</span></button>
-        </article>
+    var response = await supabase
+      .from('projects')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-        <article class="service-card">
-          <div class="service-icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M10 26l12-12 8 8-12 12H10v-8Z"/>
-              <path d="M22 14l6-6 4 4-6 6"/>
-              <path d="M34 10l8-4"/>
-              <path d="M36 18l6 2"/>
-              <path d="M30 24l8 6"/>
-              <path d="M10 34l-4 8"/>
-            </svg>
-          </div>
-          <h3>Pressure Wash</h3>
-          <p>High-powered deep cleaning for driveways, patios, walkways, and decks to remove grime, moss, and stains.</p>
-          <button class="service-cta" data-open-modal data-service="Pressure Wash">Get a Free Quote <span aria-hidden="true">→</span></button>
-        </article>
+    if (response.error || !response.data || response.data.length === 0) {
+      galleryGrid.innerHTML = '<p style="color:var(--ink-soft); grid-column:1/-1; text-align:center;">No projects published yet.</p>';
+      return;
+    }
 
-      </div>
-    </div>
-  </section>
+    galleryGrid.innerHTML = '';
+    response.data.forEach(function (proj) {
+      var card = document.createElement('article');
+      card.className = 'project-card reveal-init';
+      card.innerHTML = 
+        '<div class="project-card-thumb">' +
+          '<img src="' + proj.after_img + '" alt="' + proj.title + '" loading="lazy">' +
+          '<div class="project-badge-split"><span>Before</span> / <span>After</span></div>' +
+        '</div>' +
+        '<div class="project-card-info">' +
+          '<span class="project-tag">' + proj.category + '</span>' +
+          '<h3>' + proj.title + '</h3>' +
+          '<span class="project-view-cta">Interactive Slider &rarr;</span>' +
+        '</div>';
 
-  <!-- BEFORE & AFTER GALLERY SECTION -->
-  <section id="gallery" class="gallery">
-    <div class="section-inner">
-      <div class="gallery-header">
-        <div>
-          <p class="eyebrow">Proven Results</p>
-          <h2>Before &amp; After Transformations</h2>
-          <p class="section-sub">Explore our recent client projects across Surrey. Click on any card to interact with the side-by-side comparison slider.</p>
-        </div>
-        <button class="btn btn-ghost btn-sm admin-trigger-btn" id="openAdminBtn" title="Client Admin Portal">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <span>Manage Projects</span>
-        </button>
-      </div>
+      card.addEventListener('click', function () {
+        openSliderModal({
+          title: proj.title,
+          category: proj.category,
+          before: proj.before_img,
+          after: proj.after_img
+        });
+      });
 
-      <div class="gallery-grid" id="galleryGrid"></div>
-    </div>
-  </section>
+      galleryGrid.appendChild(card);
+    });
 
-  <!-- ABOUT -->
-  <section id="about" class="about">
-    <div class="section-inner about-inner">
-      <div class="about-bento">
-        <div class="bento-item bento-large">
-          <img src="https://images.unsplash.com/photo-1558904541-efa843a96f01?q=80&w=1200&auto=format&fit=crop" alt="Manicured residential landscaped garden and stone pathway in Surrey BC" loading="lazy" width="600" height="400">
-        </div>
-        <div class="bento-item">
-          <img src="https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?q=80&w=800&auto=format&fit=crop" alt="H and H Ivy landscaper performing property assessment on site in White Rock" loading="lazy" width="400" height="260">
-        </div>
-        <div class="bento-item">
-          <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop" alt="Cleanly trimmed cedar privacy hedges lining a garden in Langley" loading="lazy" width="400" height="260">
-        </div>
-        <div class="bento-item bento-stat">
-          <div style="display:flex; align-items:baseline;">
-            <span class="stat-num" data-count="33">0</span>
-            <span class="stat-num" style="font-size:34px; font-weight:700; color:var(--mint);">+</span>
-          </div>
-          <span class="stat-label">Years Serving BC Since 1993</span>
-        </div>
-      </div>
-      <div class="about-text">
-        <p class="eyebrow eyebrow-light">The Journey</p>
-        <h2>Local Roots Since 1993.</h2>
-        <p>H&amp;H Ivy Landscaping has been caring for Surrey lawns and gardens since 1993 — long enough to have watched entire neighbourhoods grow up around the properties we maintain. What started as a small local crew has grown into a trusted name for residential and commercial grounds care across the region, built one well-kept lawn at a time.</p>
-        <p>Today our team handles everything from weekly mowing to seasonal aeration, sod replacement, pressure washing, fertilization, and pruning across Surrey, Delta, White Rock, Langley, and the Greater Vancouver area. The approach hasn't changed since day one: show up on schedule, do the job right, and treat every yard like it's the only one on our list.</p>
-        <button class="btn btn-primary btn-glow" data-open-modal>Request a Free Quote</button>
-      </div>
-    </div>
-  </section>
+    setTimeout(function() {
+      document.querySelectorAll('.project-card').forEach(function(el) {
+        el.classList.add('reveal-visible');
+      });
+    }, 50);
+  }
 
-  <!-- BLOG -->
-  <section id="blog" class="blog">
-    <div class="section-inner">
-      <p class="eyebrow">Field Notes</p>
-      <h2>Surrey Landscaping Tips &amp; Field Notes</h2>
-      <p class="section-sub">Notes from our design team on getting the most out of a Pacific Northwest property.</p>
+  fetchLiveProjects();
 
-      <div class="blog-grid">
+  /* ------------------------------------------------------------------
+     5. Helper: Upload Image to Supabase Cloud Storage
+     ------------------------------------------------------------------ */
+  async function uploadToCloudStorage(file) {
+    if (!supabase) throw new Error('Supabase client not initialized');
+    var fileExt = file.name.split('.').pop();
+    var fileName = Date.now() + '-' + Math.random().toString(36).substring(2) + '.' + fileExt;
+    var filePath = 'uploads/' + fileName;
 
-        <article class="blog-card">
-          <div class="blog-img">
-            <img src="blog-lawn.jpg" alt="Pristine striped lawn after mowing and aeration in South Surrey" loading="lazy" width="380" height="190">
-          </div>
-          <div class="blog-body">
-            <div class="blog-meta"><span class="blog-tag">Lawn Care</span><span class="blog-read">5 min read</span></div>
-            <h3>Why a Well-Maintained Lawn Is the Best Investment for Your Surrey Property</h3>
-            <p class="blog-snippet">A patchy, overgrown lawn is one of the fastest ways to make an otherwise great property look neglected — and it's one of the easiest things to fix.<span class="blog-more" id="blog1-more"> A single mow doesn't transform a lawn, but a season of scheduled mowing, timed fertilization, and yearly aeration does. Thick, deep-rooted turf outcompetes weeds on its own, needs less water to stay green, and reads as the first sign that a property is genuinely cared for — long before anyone notices the rest of the yard.</span></p>
-            <button class="blog-toggle" data-target="blog1-more" aria-expanded="false">Read More</button>
-          </div>
-        </article>
+    var uploadRes = await supabase.storage
+      .from('project-images')
+      .upload(filePath, file, { cacheControl: '3600', upsert: false });
 
-        <article class="blog-card">
-          <div class="blog-img">
-            <img src="blog-winter.jpg" alt="Frost-covered sculpted evergreen shrubs during British Columbia winter" loading="lazy" width="380" height="190">
-          </div>
-          <div class="blog-body">
-            <div class="blog-meta"><span class="blog-tag">Garden Care</span><span class="blog-read">5 min read</span></div>
-            <h3>How to Keep Your Garden Lush During British Columbia Winters</h3>
-            <p class="blog-snippet">Coastal BC winters are wet more than they are frozen, which means most gardens fail from drainage problems, not cold snaps.<span class="blog-more" id="blog2-more"> The plants that hold their structure through January are chosen for root tolerance to standing water, not just cold hardiness zones. A few strategic evergreens and a properly graded bed will carry a garden's shape even when everything deciduous has gone dormant.</span></p>
-            <button class="blog-toggle" data-target="blog2-more" aria-expanded="false">Read More</button>
-          </div>
-        </article>
+    if (uploadRes.error) throw uploadRes.error;
 
-        <article class="blog-card">
-          <div class="blog-img">
-            <img src="blog-hedge.jpg" alt="Architectural hedge trimming along a stone pathway in White Rock BC" loading="lazy" width="380" height="190">
-          </div>
-          <div class="blog-body">
-            <div class="blog-meta"><span class="blog-tag">Design Trends</span><span class="blog-read">4 min read</span></div>
-            <h3>The Art of Architectural Hedges &amp; Defined Garden Pathways</h3>
-            <p class="blog-snippet">As more Surrey homeowners lean into clean exterior designs, sculpted hedges have become the preferred way to frame garden walkways without adding visual clutter.<span class="blog-more" id="blog3-more"> A cleanly shaped hedge structure reads as intentional rather than overgrown, and unlike a fence or retaining wall, it changes subtly with the seasons. Done well, it becomes the single signature element a property is remembered for.</span></p>
-            <button class="blog-toggle" data-target="blog3-more" aria-expanded="false">Read More</button>
-          </div>
-        </article>
+    var publicUrlRes = supabase.storage
+      .from('project-images')
+      .getPublicUrl(filePath);
 
-      </div>
-    </div>
-  </section>
+    return publicUrlRes.data.publicUrl;
+  }
 
-</main>
+  /* ------------------------------------------------------------------
+     6. Comparison Slider Engine & Modal
+     ------------------------------------------------------------------ */
+  var sliderModal = document.getElementById('sliderModal');
+  var sliderModalClose = document.getElementById('sliderModalClose');
+  var compImgAfter = document.getElementById('compImgAfter');
+  var compImgBefore = document.getElementById('compImgBefore');
+  var compBeforeWrapper = document.getElementById('compBeforeWrapper');
+  var compHandle = document.getElementById('compHandle');
+  var compContainer = document.getElementById('comparisonContainer');
+  var sliderProjectTitle = document.getElementById('sliderProjectTitle');
+  var sliderProjectCategory = document.getElementById('sliderProjectCategory');
 
-<footer class="site-footer">
-  <div class="section-inner footer-inner">
-    <div class="footer-brand">
-      <a href="#home" class="nav-logo">
-        <img src="logo.jpg" alt="H&amp;H Ivy Landscaping Logo" class="brand-logo-img" width="34" height="34">
-        <span>H&amp;H Ivy Landscaping</span>
-      </a>
-      <p class="footer-tagline">You grow, we mow. Since 1993.</p>
-      <p class="footer-seo">Proudly serving Surrey, Delta, White Rock, Langley, and the Greater Vancouver area.</p>
-    </div>
-    <nav class="footer-links" aria-label="Footer">
-      <a href="#home">Home</a>
-      <a href="#services">Services</a>
-      <a href="#gallery">Projects</a>
-      <a href="#about">About</a>
-      <a href="#blog">Blog</a>
-      <a href="#" id="footerAdminLink" class="footer-admin-link">Admin Portal 🔒</a>
-    </nav>
-    <div class="footer-contact">
-      <a href="tel:+16723995554">(672) 399-5554</a>
-      <a href="mailto:landscape.hhivy@gmail.com">landscape.hhivy@gmail.com</a>
-      <a href="https://www.instagram.com/h.h_ivy_landscaping" target="_blank" rel="noopener noreferrer" class="footer-social">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><path d="M17.5 6.5h.01"/></svg>
-        <span>@h.h_ivy_landscaping</span>
-      </a>
-      <button class="btn btn-ghost btn-sm" data-open-modal>Request a Free Quote</button>
-    </div>
-  </div>
-  <div class="footer-bottom">© 2026 H&amp;H Ivy Landscaping Ltd. All rights reserved.</div>
-</footer>
+  function syncBeforeImageDimensions() {
+    if (compContainer && compImgBefore) {
+      compImgBefore.style.width = compContainer.offsetWidth + 'px';
+    }
+  }
 
-<!-- Floating Action Buttons -->
-<a href="https://wa.me/16723995554?text=Hi%20H%26H%20Ivy%20Landscaping,%20I'd%20like%20to%20get%20a%20free%20quote%20for%20my%20property%20in%20Surrey." 
-   target="_blank" 
-   rel="noopener noreferrer" 
-   class="whatsapp-float" 
-   id="whatsappWidget" 
-   aria-label="Chat with us on WhatsApp">
-  <div class="whatsapp-pulse"></div>
-  <svg viewBox="0 0 32 32" width="28" height="28" fill="currentColor">
-    <path d="M16 2a13.9 13.9 0 0 0-12 21L2 30l7.3-1.9A13.9 13.9 0 1 0 16 2zm0 25.5a11.5 11.5 0 0 1-5.9-1.6l-.4-.3-4.4 1.1 1.2-4.2-.3-.5A11.6 11.6 0 1 1 16 27.5zm6.4-8.6c-.4-.2-2.1-1-2.4-1.2-.3-.1-.6-.2-.8.2-.3.3-1 1.2-1.2 1.4-.2.2-.4.3-.8.1a10.1 10.1 0 0 1-3-1.8 11.2 11.2 0 0 1-2.1-2.6c-.2-.4 0-.6.2-.8.2-.2.4-.4.6-.6.2-.2.3-.4.4-.6.1-.3 0-.5 0-.7s-.8-2-1.1-2.7c-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.7.1-1 .5-.4.4-1.4 1.4-1.4 3.4s1.5 3.9 1.7 4.2c.2.3 2.9 4.4 7 6.2 1 .4 1.7.7 2.3.9 1 .3 1.9.3 2.6.2.8-.1 2.4-1 2.8-1.9.3-1 .3-1.8.2-1.9-.1-.2-.4-.3-.7-.5z"/>
-  </svg>
-  <span class="whatsapp-tooltip">Chat on WhatsApp</span>
-</a>
+  function setSliderPosition(percentage) {
+    var p = Math.max(0, Math.min(100, percentage));
+    compBeforeWrapper.style.width = p + '%';
+    compHandle.style.left = p + '%';
+  }
 
-<button class="floating-cta" id="floatingCta" data-open-modal>
-  <img src="logo.jpg" alt="" class="cta-logo-icon" width="22" height="22">
-  <span>Request a Free Quote</span>
-</button>
+  function openSliderModal(proj) {
+    sliderProjectTitle.textContent = proj.title;
+    sliderProjectCategory.textContent = proj.category;
+    compImgBefore.src = proj.before;
+    compImgAfter.src = proj.after;
 
-<!-- POPUP BEFORE & AFTER COMPARISON SLIDER MODAL -->
-<div class="modal-overlay" id="sliderModal" aria-hidden="true">
-  <div class="modal-card slider-modal-card" role="dialog" aria-modal="true" aria-labelledby="sliderProjectTitle">
-    <button class="modal-close" id="sliderModalClose" aria-label="Close dialog">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l16 16M20 4L4 20"/></svg>
-    </button>
-    <div class="slider-modal-header">
-      <p class="eyebrow" id="sliderProjectCategory">Project Showcase</p>
-      <h3 id="sliderProjectTitle">Transformation View</h3>
-      <p class="modal-sub">Drag the center slider left or right to compare Before and After results.</p>
-    </div>
+    sliderModal.classList.add('open');
+    sliderModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
 
-    <div class="comparison-container" id="comparisonContainer">
-      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" alt="After Project" class="comp-img comp-after" id="compImgAfter">
-      <div class="comp-before-wrapper" id="compBeforeWrapper">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" alt="Before Project" class="comp-img comp-before" id="compImgBefore">
-      </div>
-      <div class="comp-handle" id="compHandle">
-        <div class="comp-handle-button">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </div>
-      </div>
-      <span class="comp-badge comp-badge-before">BEFORE</span>
-      <span class="comp-badge comp-badge-after">AFTER</span>
-    </div>
-  </div>
-</div>
+    window.requestAnimationFrame(function () {
+      syncBeforeImageDimensions();
+      setSliderPosition(50);
+    });
+  }
 
-<!-- CLIENT ADMIN PORTAL MODAL -->
-<div class="modal-overlay" id="adminModal" aria-hidden="true">
-  <div class="modal-card admin-modal-card" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
-    <button class="modal-close" id="adminModalClose" aria-label="Close dialog">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l16 16M20 4L4 20"/></svg>
-    </button>
+  function closeSliderModal() {
+    sliderModal.classList.remove('open');
+    sliderModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
 
-    <div id="adminLoginView">
-      <p class="eyebrow">Owner Access</p>
-      <h3 id="adminTitle">Admin Login</h3>
-      <p class="modal-sub">Log in to add, edit, or remove your Before &amp; After project showcase items.</p>
-      <form id="adminLoginForm">
-        <div class="form-row">
-          <label for="adminPass">Admin Passcode</label>
-          <input type="password" id="adminPass" placeholder="Enter owner passcode" required autocomplete="current-password">
-          <span class="field-error" id="adminLoginErr"></span>
-        </div>
-        <button type="submit" class="btn btn-primary btn-glow btn-block">Log In</button>
-      </form>
-    </div>
+  if (sliderModalClose) sliderModalClose.addEventListener('click', closeSliderModal);
+  if (sliderModal) {
+    sliderModal.addEventListener('click', function (e) {
+      if (e.target === sliderModal) closeSliderModal();
+    });
+  }
 
-    <div id="adminDashboardView" hidden>
-      <div class="admin-dash-header">
-        <div>
-          <p class="eyebrow">Project Manager</p>
-          <h3 style="font-size: 20px;">Add New Project</h3>
-        </div>
-        <button class="btn btn-ghost btn-sm" id="adminLogoutBtn">Sign Out</button>
-      </div>
+  var isSliding = false;
+  function handleSliderMove(e) {
+    if (!isSliding || !compContainer) return;
+    var rect = compContainer.getBoundingClientRect();
+    var clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    if (clientX === undefined) return;
+    var position = ((clientX - rect.left) / rect.width) * 100;
+    setSliderPosition(position);
+  }
 
-      <form id="addProjectForm">
-        <div class="form-row">
-          <label for="projTitle">Project Title</label>
-          <input type="text" id="projTitle" placeholder="e.g., South Surrey Sod Replacement" required>
-        </div>
-        <div class="form-row">
-          <label for="projCategory">Category / Service</label>
-          <select id="projCategory" required>
-            <option>Lawn Mowing &amp; Edging</option>
-            <option>Sod Installation</option>
-            <option>Hedge Trimming &amp; Shaping</option>
-            <option>Pressure Washing</option>
-            <option>Aeration &amp; Power Raking</option>
-            <option>Garden Planting &amp; Cleanups</option>
-          </select>
-        </div>
-        <div class="form-row-group">
-          <div class="form-row">
-            <label for="projBeforeImg">"Before" Photo</label>
-            <input type="file" id="projBeforeImg" accept="image/*" required>
-          </div>
-          <div class="form-row">
-            <label for="projAfterImg">"After" Photo</label>
-            <input type="file" id="projAfterImg" accept="image/*" required>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary btn-glow btn-block" id="publishProjBtn">Publish Project</button>
-      </form>
+  if (compContainer) {
+    compContainer.addEventListener('mousedown', function (e) { isSliding = true; handleSliderMove(e); });
+    compContainer.addEventListener('touchstart', function (e) { isSliding = true; handleSliderMove(e); }, { passive: true });
+  }
 
-      <div class="admin-project-list">
-        <h4 style="margin:24px 0 12px; font-size:16px;">Existing Published Projects</h4>
-        <div id="adminProjectsListWrap"></div>
-      </div>
-    </div>
-  </div>
-</div>
+  window.addEventListener('mousemove', handleSliderMove);
+  window.addEventListener('touchmove', handleSliderMove, { passive: true });
+  window.addEventListener('mouseup', function () { isSliding = false; });
+  window.addEventListener('touchend', function () { isSliding = false; });
+  window.addEventListener('resize', syncBeforeImageDimensions);
 
-<!-- Quote Modal -->
-<div class="modal-overlay" id="quoteModal" aria-hidden="true">
-  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <button class="modal-close" id="modalClose" aria-label="Close dialog">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l16 16M20 4L4 20"/></svg>
-    </button>
+  /* ------------------------------------------------------------------
+     7. Client Admin Portal (Authenticated Supabase Access)
+     ------------------------------------------------------------------ */
+  var adminModal = document.getElementById('adminModal');
+  var openAdminBtn = document.getElementById('openAdminBtn');
+  var footerAdminLink = document.getElementById('footerAdminLink');
+  var adminModalClose = document.getElementById('adminModalClose');
+  var adminLoginForm = document.getElementById('adminLoginForm');
+  var adminLoginView = document.getElementById('adminLoginView');
+  var adminDashboardView = document.getElementById('adminDashboardView');
+  var adminLoginErr = document.getElementById('adminLoginErr');
+  var adminLogoutBtn = document.getElementById('adminLogoutBtn');
+  var addProjectForm = document.getElementById('addProjectForm');
+  var adminProjectsListWrap = document.getElementById('adminProjectsListWrap');
+  var publishProjBtn = document.getElementById('publishProjBtn');
 
-    <div class="modal-form-wrap" id="modalFormWrap">
-      <p class="eyebrow">Let's Talk</p>
-      <h3 id="modalTitle">Request Your Free Quote</h3>
-      <p class="modal-sub">Tell us a bit about your property. Someone from our team will follow up personally — no pricing over the phone, just a real conversation.</p>
+  function openAdminModal() {
+    adminModal.classList.add('open');
+    adminModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
 
-      <form id="quoteForm" action="https://api.web3forms.com/submit" method="POST">
-        <input type="hidden" name="access_key" value="8217dd13-c234-4516-b1a3-09b6ea907a6b">
+  function closeAdminModal() {
+    adminModal.classList.remove('open');
+    adminModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (openAdminBtn) openAdminBtn.addEventListener('click', openAdminModal);
+  if (footerAdminLink) footerAdminLink.addEventListener('click', function(e) { e.preventDefault(); openAdminModal(); });
+  if (adminModalClose) adminModalClose.addEventListener('click', closeAdminModal);
+  if (adminModal) {
+    adminModal.addEventListener('click', function(e) { if (e.target === adminModal) closeAdminModal(); });
+  }
+
+  if (adminLoginForm) {
+    adminLoginForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var email = "landscape.hhivy@gmail.com";
+      var password = document.getElementById('adminPass').value;
+
+      var loginBtn = adminLoginForm.querySelector('button[type="submit"]');
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Verifying...';
+
+      var authRes = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Log In';
+
+      if (authRes.error) {
+        adminLoginErr.textContent = 'Invalid credentials. Access denied.';
+      } else {
+        adminLoginErr.textContent = '';
+        adminLoginView.hidden = true;
+        adminDashboardView.hidden = false;
+        renderAdminProjectList();
+      }
+    });
+  }
+
+  if (adminLogoutBtn) {
+    adminLogoutBtn.addEventListener('click', async function () {
+      await supabase.auth.signOut();
+      adminDashboardView.hidden = true;
+      adminLoginView.hidden = false;
+      adminLoginForm.reset();
+    });
+  }
+
+  async function renderAdminProjectList() {
+    if (!adminProjectsListWrap) return;
+    adminProjectsListWrap.innerHTML = '<p style="font-size:13px; color:var(--ink-soft);">Loading records...</p>';
+
+    var res = await supabase.from('projects').select('*').order('created_at', { ascending: false });
+    if (res.error || !res.data) return;
+
+    adminProjectsListWrap.innerHTML = '';
+    res.data.forEach(function (proj) {
+      var item = document.createElement('div');
+      item.className = 'admin-item-row';
+      item.innerHTML = 
+        '<div class="admin-item-info">' +
+          '<img src="' + proj.after_img + '" class="admin-item-thumb" alt="">' +
+          '<div><strong>' + proj.title + '</strong><br><small style="color:var(--ink-soft);">' + proj.category + '</small></div>' +
+        '</div>' +
+        '<button class="admin-delete-btn" data-id="' + proj.id + '">Delete</button>';
+
+      item.querySelector('.admin-delete-btn').addEventListener('click', async function () {
+        if (!confirm('Delete this project permanently from the live website?')) return;
         
-        <div class="form-row">
-          <label for="q-name">Full Name</label>
-          <input type="text" id="q-name" name="name" autocomplete="name" required>
-          <span class="field-error" id="err-name" role="alert"></span>
-        </div>
+        var delBtn = item.querySelector('.admin-delete-btn');
+        delBtn.textContent = 'Deleting...';
+        delBtn.disabled = true;
 
-        <div class="form-row">
-          <label for="q-email">Email</label>
-          <input type="email" id="q-email" name="email" autocomplete="email" required>
-          <span class="field-error" id="err-email" role="alert"></span>
-        </div>
+        var delRes = await supabase.from('projects').delete().eq('id', proj.id);
+        if (!delRes.error) {
+          renderAdminProjectList();
+          fetchLiveProjects();
+        } else {
+          alert('Delete failed. Please check database permissions.');
+          delBtn.textContent = 'Delete';
+          delBtn.disabled = false;
+        }
+      });
 
-        <div class="form-row-group">
-          <div class="form-row">
-            <label for="q-phone">Phone</label>
-            <input type="tel" id="q-phone" name="phone" autocomplete="tel" required>
-            <span class="field-error" id="err-phone" role="alert"></span>
-          </div>
-          <div class="form-row">
-            <label for="q-city">City</label>
-            <select id="q-city" name="city" required>
-              <option value="" disabled selected>Select your city</option>
-              <option>Surrey</option>
-              <option>Delta</option>
-              <option>White Rock</option>
-              <option>Langley</option>
-              <option>Greater Vancouver (Other)</option>
-            </select>
-            <span class="field-error" id="err-city" role="alert"></span>
-          </div>
-        </div>
+      adminProjectsListWrap.appendChild(item);
+    });
+  }
 
-        <div class="form-row">
-          <label for="q-service">Service Needed</label>
-          <select id="q-service" name="service" required>
-            <option value="" disabled selected>Select a service</option>
-            <option>Lawn Mowing</option>
-            <option>Weed Control</option>
-            <option>Hedge Trimming</option>
-            <option>Planting</option>
-            <option>Aeration</option>
-            <option>Fertilization</option>
-            <option>Power Raking</option>
-            <option>Tree Pruning</option>
-            <option>Sod Installation</option>
-            <option>Pressure Wash</option>
-            <option>Not Sure / Multiple Services</option>
-          </select>
-          <span class="field-error" id="err-service" role="alert"></span>
-        </div>
+  if (addProjectForm) {
+    addProjectForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var title = document.getElementById('projTitle').value.trim();
+      var category = document.getElementById('projCategory').value;
+      var beforeFile = document.getElementById('projBeforeImg').files[0];
+      var afterFile = document.getElementById('projAfterImg').files[0];
 
-        <div class="form-row">
-          <label for="q-description">Project Description <span class="label-optional">(Optional)</span></label>
-          <textarea id="q-description" name="description" rows="4" maxlength="600" placeholder="Tell us about your property, timeline, or any inspiration you have in mind."></textarea>
-          <span class="field-error" id="err-description" role="alert"></span>
-        </div>
+      if (!beforeFile || !afterFile) {
+        alert('Please select both Before and After photos.');
+        return;
+      }
 
-        <div class="form-row-group">
-          <div class="form-row">
-            <label for="q-date">Preferred Date</label>
-            <input type="date" id="q-date" name="date" required>
-            <span class="field-error" id="err-date" role="alert"></span>
-          </div>
-          <div class="form-row">
-            <label for="q-time">Preferred Time</label>
-            <input type="time" id="q-time" name="time" required>
-            <span class="field-error" id="err-time" role="alert"></span>
-          </div>
-        </div>
+      publishProjBtn.disabled = true;
+      publishProjBtn.textContent = 'Uploading to Cloud...';
 
-        <button type="submit" class="btn btn-primary btn-glow btn-block" id="quoteSubmitBtn">Submit Request</button>
-      </form>
-    </div>
+      try {
+        var beforeUrl = await uploadToCloudStorage(beforeFile);
+        var afterUrl = await uploadToCloudStorage(afterFile);
 
-    <div class="modal-success" id="modalSuccess" hidden>
-      <div class="success-check">
-        <svg viewBox="0 0 52 52">
-          <circle class="success-circle" cx="26" cy="26" r="24" fill="none"/>
-          <path class="success-tick" fill="none" d="M14 27l7 7 17-17"/>
-        </svg>
-      </div>
-      <h3 id="successMessage">Thank you!</h3>
-      <p>A landscaping architect will contact you shortly to schedule your Surrey area quote.</p>
-      <div id="waFollowUpAction" style="margin-top: 18px;"></div>
-      <button class="btn btn-ghost" id="modalDoneBtn" style="margin-top: 14px;">Close</button>
-    </div>
-  </div>
-</div>
+        var insertRes = await supabase.from('projects').insert([
+          {
+            title: title,
+            category: category,
+            before_img: beforeUrl,
+            after_img: afterUrl
+          }
+        ]);
 
-<script src="script.js"></script>
-</body>
-</html>
+        if (insertRes.error) throw insertRes.error;
+
+        addProjectForm.reset();
+        renderAdminProjectList();
+        fetchLiveProjects();
+        alert('Project successfully published live to all visitors!');
+      } catch (err) {
+        console.error(err);
+        alert('Upload failed: ' + (err.message || 'Check database permissions.'));
+      } finally {
+        publishProjBtn.disabled = false;
+        publishProjBtn.textContent = 'Publish Project';
+      }
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     8. Blog "Read More" Toggle
+     ------------------------------------------------------------------ */
+  Array.prototype.forEach.call(document.querySelectorAll('.blog-toggle'), function (btn) {
+    btn.addEventListener('click', function () {
+      var targetId = btn.getAttribute('data-target');
+      var target = document.getElementById(targetId);
+      if (!target) return;
+      var isExpanded = target.classList.toggle('expanded');
+      btn.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+      btn.textContent = isExpanded ? 'Read Less' : 'Read More';
+    });
+  });
+
+  /* ------------------------------------------------------------------
+     9. Quote Form Engine (Direct WhatsApp Dispatch)
+     ------------------------------------------------------------------ */
+  var quoteModal = document.getElementById('quoteModal');
+  var quoteModalClose = document.getElementById('modalClose');
+  var quoteForm = document.getElementById('quoteForm');
+  var modalSuccess = document.getElementById('modalSuccess');
+  var modalFormWrap = document.getElementById('modalFormWrap');
+  var modalDoneBtn = document.getElementById('modalDoneBtn');
+  var serviceSelect = document.getElementById('q-service');
+  var dateInput = document.getElementById('q-date');
+  var waFollowUpAction = document.getElementById('waFollowUpAction');
+
+  if (dateInput) {
+    dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
+  }
+
+  function openQuoteModal(triggerEl) {
+    var preset = triggerEl && triggerEl.getAttribute('data-service');
+    if (preset && serviceSelect) {
+      Array.prototype.forEach.call(serviceSelect.options, function (opt) {
+        if (opt.value === preset || opt.text === preset) serviceSelect.value = opt.value || opt.text;
+      });
+    }
+    if (quoteModal) {
+      quoteModal.classList.add('open');
+      quoteModal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeQuoteModal() {
+    if (quoteModal) {
+      quoteModal.classList.remove('open');
+      quoteModal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      setTimeout(function () {
+        if (modalSuccess) modalSuccess.hidden = true;
+        if (modalFormWrap) modalFormWrap.hidden = false;
+        if (quoteForm) quoteForm.reset();
+      }, 400);
+    }
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-open-modal]'), function (trigger) {
+    trigger.addEventListener('click', function () { openQuoteModal(trigger); });
+  });
+
+  if (quoteModalClose) quoteModalClose.addEventListener('click', closeQuoteModal);
+  if (modalDoneBtn) modalDoneBtn.addEventListener('click', closeQuoteModal);
+  if (quoteModal) {
+    quoteModal.addEventListener('click', function(e) { if (e.target === quoteModal) closeQuoteModal(); });
+  }
+
+  var fieldMessages = {
+    name: 'Please enter your full name.',
+    email: 'Please enter a valid email address.',
+    phone: 'A phone number is required.',
+    city: 'Please select your area.',
+    service: 'Please select a service.',
+    date: 'Please choose a preferred date.',
+    time: 'Please choose a preferred time.'
+  };
+
+  function setFieldError(fieldName, message) {
+    var input = document.getElementById('q-' + fieldName);
+    var errorEl = document.getElementById('err-' + fieldName);
+    if (input && errorEl) {
+      input.closest('.form-row').classList.add('has-error');
+      errorEl.textContent = message || '';
+    }
+  }
+
+  function clearFieldError(fieldName) {
+    var input = document.getElementById('q-' + fieldName);
+    var errorEl = document.getElementById('err-' + fieldName);
+    if (input && errorEl) {
+      input.closest('.form-row').classList.remove('has-error');
+      errorEl.textContent = '';
+    }
+  }
+
+  function validateForm() {
+    var data = {
+      name: document.getElementById('q-name').value.trim(),
+      email: document.getElementById('q-email').value.trim(),
+      phone: document.getElementById('q-phone').value.trim(),
+      city: document.getElementById('q-city').value,
+      service: document.getElementById('q-service').value,
+      description: document.getElementById('q-description').value.trim(),
+      date: document.getElementById('q-date').value,
+      time: document.getElementById('q-time').value
+    };
+
+    var firstInvalid = null;
+    var isValid = true;
+
+    Object.keys(data).forEach(clearFieldError);
+
+    if (!data.name) { setFieldError('name', fieldMessages.name); isValid = false; firstInvalid = firstInvalid || 'name'; }
+    if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) { setFieldError('email', fieldMessages.email); isValid = false; firstInvalid = firstInvalid || 'email'; }
+    if (!data.phone || data.phone.replace(/\D/g, '').length < 10) { setFieldError('phone', fieldMessages.phone); isValid = false; firstInvalid = firstInvalid || 'phone'; }
+    if (!data.city) { setFieldError('city', fieldMessages.city); isValid = false; firstInvalid = firstInvalid || 'city'; }
+    if (!data.service) { setFieldError('service', fieldMessages.service); isValid = false; firstInvalid = firstInvalid || 'service'; }
+    if (!data.date) { setFieldError('date', fieldMessages.date); isValid = false; firstInvalid = firstInvalid || 'date'; }
+    if (!data.time) { setFieldError('time', fieldMessages.time); isValid = false; firstInvalid = firstInvalid || 'time'; }
+
+    return { isValid: isValid, data: data, firstInvalid: firstInvalid };
+  }
+
+  ['name', 'email', 'phone', 'city', 'service', 'description', 'date', 'time'].forEach(function (key) {
+    var input = document.getElementById('q-' + key);
+    if (input) {
+      input.addEventListener('input', function () { clearFieldError(key); });
+      input.addEventListener('change', function () { clearFieldError(key); });
+    }
+  });
+
+  if (quoteForm) {
+    quoteForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var validation = validateForm();
+
+      if (!validation.isValid) {
+        var invalidEl = document.getElementById('q-' + validation.firstInvalid);
+        if (invalidEl) invalidEl.focus();
+        return;
+      }
+
+      modalFormWrap.hidden = true;
+      modalSuccess.hidden = false;
+
+      var clientPhone = "16723995554";
+      var waMessage = 
+        "🌿 *NEW QUOTE REQUEST — H&H IVY LANDSCAPING*\n\n" +
+        "👤 *Name:* " + validation.data.name + "\n" +
+        "📞 *Phone:* " + validation.data.phone + "\n" +
+        "📧 *Email:* " + validation.data.email + "\n" +
+        "📍 *City:* " + validation.data.city + "\n" +
+        "🛠️ *Service:* " + validation.data.service + "\n" +
+        "📅 *Preferred Date:* " + validation.data.date + "\n" +
+        "⏰ *Preferred Time:* " + validation.data.time + "\n" +
+        (validation.data.description ? "📝 *Notes:* " + validation.data.description + "\n" : "");
+
+      var waUrl = "https://wa.me/" + clientPhone + "?text=" + encodeURIComponent(waMessage);
+
+      if (waFollowUpAction) {
+        waFollowUpAction.innerHTML = 
+          '<a href="' + waUrl + '" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-glow btn-block" style="background:#25D366; border-color:#25D366;">' +
+            '<span>Open in WhatsApp</span> &rarr;' +
+          '</a>';
+      }
+
+      window.open(waUrl, '_blank');
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     10. Live Weather & Seasonal Turf Advisory Banner
+     ------------------------------------------------------------------ */
+  var weatherBanner = document.getElementById('weatherBanner');
+  var weatherTempEl = document.getElementById('weatherTemp');
+  var weatherMsgEl = document.getElementById('weatherMsg');
+  var closeWeatherBtn = document.getElementById('closeWeatherBtn');
+
+  if (closeWeatherBtn && weatherBanner) {
+    closeWeatherBtn.addEventListener('click', function() {
+      weatherBanner.classList.add('hidden');
+      try { sessionStorage.setItem('hh_weather_dismissed', '1'); } catch (e) {}
+    });
+  }
+
+  function fetchSurreyWeather() {
+    if (sessionStorage.getItem('hh_weather_dismissed') === '1' && weatherBanner) {
+      weatherBanner.classList.add('hidden');
+      return;
+    }
+
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=49.1913&longitude=-122.8490&current=temperature_2m,weather_code&timezone=America%2FVancouver')
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (!data || !data.current || !weatherTempEl || !weatherMsgEl) return;
+        var temp = Math.round(data.current.temperature_2m);
+        var code = data.current.weather_code;
+        var month = new Date().getMonth();
+
+        weatherTempEl.textContent = 'Surrey, BC • ' + temp + '°C';
+
+        if (code >= 51 && code <= 67) {
+          weatherMsgEl.textContent = '🌧️ Rainy spell in Surrey: Ideal ground moisture for aerating and deep fertilizer uptake!';
+        } else if (month >= 2 && month <= 4) {
+          weatherMsgEl.textContent = '🌱 Spring Revival: Core Aeration & Power Raking slots are filling fast in Surrey.';
+        } else if (month >= 5 && month <= 7) {
+          weatherMsgEl.textContent = '☀️ Summer Care: Weekly precision mowing & hydration plans active across Surrey.';
+        } else if (month >= 8 && month <= 10) {
+          weatherMsgEl.textContent = '🍂 Fall Cleanups & Over-seeding: Prep your lawn before Pacific Northwest winter rains.';
+        } else {
+          weatherMsgEl.textContent = '❄️ Winter Garden Care: Pruning & structural hedging protection for coastal BC properties.';
+        }
+      })
+      .catch(function() {
+        if (weatherTempEl && weatherMsgEl) {
+          weatherTempEl.textContent = 'Surrey, BC';
+          weatherMsgEl.textContent = '🌱 Regular maintenance slots open for Surrey, Delta & White Rock properties.';
+        }
+      });
+  }
+
+  fetchSurreyWeather();
+
+  /* ------------------------------------------------------------------
+     11. Comprehensive Animation Suite
+     ------------------------------------------------------------------ */
+
+  // A. Scroll-Triggered Animated Counters
+  var counterObserver = new IntersectionObserver(function(entries, observer) {
+    entries.forEach(function(entry) {
+      if (!entry.isIntersecting) return;
+      var el = entry.target;
+      var target = parseInt(el.getAttribute('data-count'), 10);
+      if (isNaN(target)) return;
+
+      var duration = 1600;
+      var startTime = null;
+
+      function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        var progress = Math.min((timestamp - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.floor(easeOut * target);
+
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        } else {
+          el.textContent = target;
+        }
+      }
+
+      window.requestAnimationFrame(step);
+      observer.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('[data-count]').forEach(function(counter) {
+    counterObserver.observe(counter);
+  });
+
+  // B. Staggered Scroll-Reveal on Grids
+  var revealTargets = document.querySelectorAll('.service-card, .project-card, .blog-card, .bento-item');
+  revealTargets.forEach(function(el) { el.classList.add('reveal-init'); });
+
+  var revealObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('reveal-visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -40px 0px', threshold: 0.15 });
+
+  revealTargets.forEach(function(el, idx) {
+    el.style.transitionDelay = ((idx % 3) * 110) + 'ms';
+    revealObserver.observe(el);
+  });
+
+  // C. Interactive 3D Card Tilt on Hover
+  if (!reduceMotion && window.innerWidth > 960) {
+    var tiltCards = document.querySelectorAll('.service-card, .project-card, .blog-card');
+    tiltCards.forEach(function(card) {
+      card.classList.add('tilt-card');
+
+      card.addEventListener('mousemove', function(e) {
+        var rect = card.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        var centerX = rect.width / 2;
+        var centerY = rect.height / 2;
+
+        var rotateX = ((y - centerY) / centerY) * -6;
+        var rotateY = ((x - centerX) / centerX) * 6;
+
+        card.style.transform = 'perspective(1000px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) translateY(-4px)';
+      });
+
+      card.addEventListener('mouseleave', function() {
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)';
+      });
+    });
+  }
+
+  // D. Magnetic Pull Effect on Primary CTA Buttons
+  if (!reduceMotion && window.innerWidth > 960) {
+    var magnetics = document.querySelectorAll('.nav-cta, .hero .btn-primary, .admin-trigger-btn');
+    magnetics.forEach(function(btn) {
+      btn.classList.add('magnetic-btn');
+
+      btn.addEventListener('mousemove', function(e) {
+        var rect = btn.getBoundingClientRect();
+        var x = e.clientX - (rect.left + rect.width / 2);
+        var y = e.clientY - (rect.top + rect.height / 2);
+        btn.style.transform = 'translate(' + (x * 0.28) + 'px, ' + (y * 0.28) + 'px)';
+      });
+
+      btn.addEventListener('mouseleave', function() {
+        btn.style.transform = 'translate(0px, 0px)';
+      });
+    });
+  }
+
+  // E. Falling Ivy Leaves Particle Canvas Engine
+  var canvas = document.getElementById('ivyLeafCanvas');
+  if (canvas && !reduceMotion) {
+    var ctx = canvas.getContext('2d');
+    var leaves = [];
+    var leafCount = 14;
+
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    for (var i = 0; i < leafCount; i++) {
+      leaves.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 9 + 8,
+        speedX: Math.random() * 0.8 - 0.2,
+        speedY: Math.random() * 0.7 + 0.4,
+        angle: Math.random() * 360,
+        spin: Math.random() * 0.8 - 0.4,
+        opacity: Math.random() * 0.4 + 0.25
+      });
+    }
+
+    function drawLeaf(ctx, x, y, size, angle, opacity) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate((angle * Math.PI) / 180);
+      ctx.beginPath();
+      ctx.moveTo(0, -size);
+      ctx.bezierCurveTo(size / 2, -size / 2, size / 2, size / 2, 0, size);
+      ctx.bezierCurveTo(-size / 2, size / 2, -size / 2, -size / 2, 0, -size);
+      ctx.fillStyle = 'rgba(71, 151, 59, ' + opacity + ')';
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function renderLeaves() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      leaves.forEach(function(l) {
+        l.x += l.speedX;
+        l.y += l.speedY;
+        l.angle += l.spin;
+
+        if (l.y > canvas.height + 20) {
+          l.y = -20;
+          l.x = Math.random() * canvas.width;
+        }
+        if (l.x > canvas.width + 20) l.x = -20;
+        if (l.x < -20) l.x = canvas.width + 20;
+
+        drawLeaf(ctx, l.x, l.y, l.size, l.angle, l.opacity);
+      });
+      window.requestAnimationFrame(renderLeaves);
+    }
+    renderLeaves();
+  }
+
+})();

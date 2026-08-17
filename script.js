@@ -1,5 +1,5 @@
 /* ==========================================================================
-   H&H IVY LANDSCAPING — Site Core, Performance, Gallery & Admin Engine
+   H&H IVY LANDSCAPING — Site Interactions, Cloud Gallery & Admin Portal
    ========================================================================== */
 (function () {
   'use strict';
@@ -7,7 +7,7 @@
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ------------------------------------------------------------------
-     1. Theme Engine (Dark / Light)
+     1. Dark Mode Toggle
      ------------------------------------------------------------------ */
   var themeToggle = document.getElementById('themeToggle');
   var THEME_KEY = 'hh-ivy-theme';
@@ -17,29 +17,33 @@
     if (themeToggle) themeToggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
   }
 
+  function storeTheme(theme) {
+    try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+  }
+
   if (themeToggle) {
     applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
     themeToggle.addEventListener('click', function () {
       var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       applyTheme(next);
-      try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+      storeTheme(next);
     });
   }
 
   /* ------------------------------------------------------------------
-     2. Navigation & Smooth Interactivity
+     2. Sticky Nav & Mobile Menu
      ------------------------------------------------------------------ */
   var siteNav = document.getElementById('siteNav');
-  var navToggle = document.getElementById('navToggle');
-  var navLinks = document.getElementById('navLinks');
-
-  function handleNavScroll() {
+  function handleNavShadow() {
     if (window.scrollY > 12) {
       siteNav.classList.add('scrolled');
     } else {
       siteNav.classList.remove('scrolled');
     }
   }
+
+  var navToggle = document.getElementById('navToggle');
+  var navLinks = document.getElementById('navLinks');
 
   if (navToggle && navLinks) {
     navToggle.addEventListener('click', function () {
@@ -56,7 +60,7 @@
   }
 
   /* ------------------------------------------------------------------
-     3. Active Spy & Ivy Vine Scroll
+     3. Active Section Spy & Ivy Vine Scroll
      ------------------------------------------------------------------ */
   var sections = document.querySelectorAll('main section[id]');
   var navLinkMap = {};
@@ -69,7 +73,8 @@
   var sectionObserver = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       var link = navLinkMap[entry.target.id];
-      if (link && entry.isIntersecting) {
+      if (!link) return;
+      if (entry.isIntersecting) {
         Array.prototype.forEach.call(navLinks.querySelectorAll('.nav-link'), function (l) {
           l.classList.remove('active');
         });
@@ -100,7 +105,8 @@
 
   function updateFloatingCta() {
     if (!heroSection || !floatingCta) return;
-    if (heroSection.getBoundingClientRect().bottom < 0) {
+    var heroBottom = heroSection.getBoundingClientRect().bottom;
+    if (heroBottom < 0) {
       floatingCta.classList.add('visible');
     } else {
       floatingCta.classList.remove('visible');
@@ -109,69 +115,47 @@
 
   window.addEventListener('scroll', function () {
     window.requestAnimationFrame(function () {
-      handleNavScroll();
+      handleNavShadow();
       updateVine();
       updateFloatingCta();
     });
-  }, { passive: true });
+  });
 
   /* ------------------------------------------------------------------
-     4. Before & After Data Store & Image Compression
+     4. Supabase Client Configuration & Live Gallery
      ------------------------------------------------------------------ */
-  var DEFAULT_PROJECTS = [
-    {
-      id: 1,
-      title: "South Surrey Full Lawn Revival",
-      category: "Sod Installation",
-      before: "https://images.unsplash.com/photo-1557429287-b2e26467fc2b?q=80&w=800&auto=format&fit=crop",
-      after: "blog-lawn.jpg"
-    },
-    {
-      id: 2,
-      title: "Crescent Beach Privacy Hedge Shaping",
-      category: "Hedge Trimming & Shaping",
-      before: "https://images.unsplash.com/photo-1584467735815-f778f274e296?q=80&w=800&auto=format&fit=crop",
-      after: "blog-hedge.jpg"
-    },
-    {
-      id: 3,
-      title: "Morgan Creek Winter Garden Prep",
-      category: "Garden Planting & Cleanups",
-      before: "https://images.unsplash.com/photo-1508873696983-2df5293cb32b?q=80&w=800&auto=format&fit=crop",
-      after: "blog-winter.jpg"
-    }
-  ];
-
-  function getProjects() {
-    try {
-      var saved = localStorage.getItem('hh_ivy_projects');
-      return saved ? JSON.parse(saved) : DEFAULT_PROJECTS;
-    } catch (e) {
-      return DEFAULT_PROJECTS;
-    }
-  }
-
-  function saveProjects(projects) {
-    try {
-      localStorage.setItem('hh_ivy_projects', JSON.stringify(projects));
-    } catch (e) {
-      alert('Browser storage is full. Please delete older projects to free up space.');
-    }
-  }
+  var SUPABASE_URL = 'https://euogfaqjnwangdwugofa.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_RhZkeCtOfGAaKD-QJZVaxQ_6l5PAfgw';
+  var supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
   var galleryGrid = document.getElementById('galleryGrid');
 
-  function renderGallery() {
+  async function fetchLiveProjects() {
     if (!galleryGrid) return;
-    var projects = getProjects();
-    galleryGrid.innerHTML = '';
+    if (!supabase) {
+      galleryGrid.innerHTML = '<p style="color:var(--ink-soft); grid-column:1/-1; text-align:center;">Database loading...</p>';
+      return;
+    }
 
-    projects.forEach(function (proj) {
+    galleryGrid.innerHTML = '<p style="color:var(--ink-soft); grid-column:1/-1; text-align:center;">Loading latest projects...</p>';
+
+    var response = await supabase
+      .from('projects')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (response.error || !response.data || response.data.length === 0) {
+      galleryGrid.innerHTML = '<p style="color:var(--ink-soft); grid-column:1/-1; text-align:center;">No projects published yet.</p>';
+      return;
+    }
+
+    galleryGrid.innerHTML = '';
+    response.data.forEach(function (proj) {
       var card = document.createElement('article');
-      card.className = 'project-card';
+      card.className = 'project-card reveal-init';
       card.innerHTML = 
         '<div class="project-card-thumb">' +
-          '<img src="' + proj.after + '" alt="' + proj.title + '" loading="lazy">' +
+          '<img src="' + proj.after_img + '" alt="' + proj.title + '" loading="lazy">' +
           '<div class="project-badge-split"><span>Before</span> / <span>After</span></div>' +
         '</div>' +
         '<div class="project-card-info">' +
@@ -181,16 +165,50 @@
         '</div>';
 
       card.addEventListener('click', function () {
-        openSliderModal(proj);
+        openSliderModal({
+          title: proj.title,
+          category: proj.category,
+          before: proj.before_img,
+          after: proj.after_img
+        });
       });
 
       galleryGrid.appendChild(card);
     });
+
+    setTimeout(function() {
+      document.querySelectorAll('.project-card').forEach(function(el) {
+        el.classList.add('reveal-visible');
+      });
+    }, 50);
   }
-  renderGallery();
+
+  fetchLiveProjects();
 
   /* ------------------------------------------------------------------
-     5. Comparison Slider Engine (Touch + Mouse Support)
+     5. Helper: Upload Image to Supabase Cloud Storage
+     ------------------------------------------------------------------ */
+  async function uploadToCloudStorage(file) {
+    if (!supabase) throw new Error('Supabase client not initialized');
+    var fileExt = file.name.split('.').pop();
+    var fileName = Date.now() + '-' + Math.random().toString(36).substring(2) + '.' + fileExt;
+    var filePath = 'uploads/' + fileName;
+
+    var uploadRes = await supabase.storage
+      .from('project-images')
+      .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+    if (uploadRes.error) throw uploadRes.error;
+
+    var publicUrlRes = supabase.storage
+      .from('project-images')
+      .getPublicUrl(filePath);
+
+    return publicUrlRes.data.publicUrl;
+  }
+
+  /* ------------------------------------------------------------------
+     6. Comparison Slider Engine & Modal
      ------------------------------------------------------------------ */
   var sliderModal = document.getElementById('sliderModal');
   var sliderModalClose = document.getElementById('sliderModalClose');
@@ -265,9 +283,8 @@
   window.addEventListener('resize', syncBeforeImageDimensions);
 
   /* ------------------------------------------------------------------
-     6. Client Admin Portal
+     7. Client Admin Portal (Authenticated Supabase Access)
      ------------------------------------------------------------------ */
-  var ADMIN_PASS = 'ivy1993';
   var adminModal = document.getElementById('adminModal');
   var openAdminBtn = document.getElementById('openAdminBtn');
   var footerAdminLink = document.getElementById('footerAdminLink');
@@ -300,87 +317,88 @@
     adminModal.addEventListener('click', function(e) { if (e.target === adminModal) closeAdminModal(); });
   }
 
+  // Handle Authenticated Admin Login
   if (adminLoginForm) {
-    adminLoginForm.addEventListener('submit', function (e) {
+    adminLoginForm.addEventListener('submit', async function (e) {
       e.preventDefault();
-      var entered = document.getElementById('adminPass').value;
-      if (entered === ADMIN_PASS) {
+      var email = "landscape.hhivy@gmail.com";
+      var password = document.getElementById('adminPass').value;
+
+      var loginBtn = adminLoginForm.querySelector('button[type="submit"]');
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Verifying...';
+
+      var authRes = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Log In';
+
+      if (authRes.error) {
+        adminLoginErr.textContent = 'Invalid credentials. Access denied.';
+      } else {
         adminLoginErr.textContent = '';
         adminLoginView.hidden = true;
         adminDashboardView.hidden = false;
         renderAdminProjectList();
-      } else {
-        adminLoginErr.textContent = 'Incorrect passcode. Please try again.';
       }
     });
   }
 
+  // Handle Admin Logout
   if (adminLogoutBtn) {
-    adminLogoutBtn.addEventListener('click', function () {
+    adminLogoutBtn.addEventListener('click', async function () {
+      await supabase.auth.signOut();
       adminDashboardView.hidden = true;
       adminLoginView.hidden = false;
       adminLoginForm.reset();
     });
   }
 
-  function renderAdminProjectList() {
+  // Render Admin Project Management List
+  async function renderAdminProjectList() {
     if (!adminProjectsListWrap) return;
-    var projects = getProjects();
-    adminProjectsListWrap.innerHTML = '';
+    adminProjectsListWrap.innerHTML = '<p style="font-size:13px; color:var(--ink-soft);">Loading records...</p>';
 
-    projects.forEach(function (proj) {
+    var res = await supabase.from('projects').select('*').order('created_at', { ascending: false });
+    if (res.error || !res.data) return;
+
+    adminProjectsListWrap.innerHTML = '';
+    res.data.forEach(function (proj) {
       var item = document.createElement('div');
       item.className = 'admin-item-row';
       item.innerHTML = 
         '<div class="admin-item-info">' +
-          '<img src="' + proj.after + '" class="admin-item-thumb" alt="">' +
+          '<img src="' + proj.after_img + '" class="admin-item-thumb" alt="">' +
           '<div><strong>' + proj.title + '</strong><br><small style="color:var(--ink-soft);">' + proj.category + '</small></div>' +
         '</div>' +
         '<button class="admin-delete-btn" data-id="' + proj.id + '">Delete</button>';
 
-      item.querySelector('.admin-delete-btn').addEventListener('click', function () {
-        var updated = projects.filter(function (p) { return p.id !== proj.id; });
-        saveProjects(updated);
-        renderAdminProjectList();
-        renderGallery();
+      item.querySelector('.admin-delete-btn').addEventListener('click', async function () {
+        if (!confirm('Delete this project permanently from the live website?')) return;
+        
+        var delBtn = item.querySelector('.admin-delete-btn');
+        delBtn.textContent = 'Deleting...';
+        delBtn.disabled = true;
+
+        var delRes = await supabase.from('projects').delete().eq('id', proj.id);
+        if (!delRes.error) {
+          renderAdminProjectList();
+          fetchLiveProjects();
+        } else {
+          alert('Delete failed. Please check database permissions.');
+          delBtn.textContent = 'Delete';
+          delBtn.disabled = false;
+        }
       });
 
       adminProjectsListWrap.appendChild(item);
     });
   }
 
-  function compressImage(file, maxDimension) {
-    return new Promise(function(resolve, reject) {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var img = new Image();
-        img.onload = function() {
-          var canvas = document.createElement('canvas');
-          var width = img.width;
-          var height = img.height;
-
-          if (width > height && width > maxDimension) {
-            height = Math.round((height * maxDimension) / width);
-            width = maxDimension;
-          } else if (height > maxDimension) {
-            width = Math.round((width * maxDimension) / height);
-            height = maxDimension;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          var ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', 0.82));
-        };
-        img.onerror = reject;
-        img.src = e.target.result;
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-
+  // Secure Add Project Action
   if (addProjectForm) {
     addProjectForm.addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -395,30 +413,30 @@
       }
 
       publishProjBtn.disabled = true;
-      publishProjBtn.textContent = 'Processing & Compressing...';
+      publishProjBtn.textContent = 'Uploading to Cloud...';
 
       try {
-        var beforeB64 = await compressImage(beforeFile, 1200);
-        var afterB64 = await compressImage(afterFile, 1200);
+        var beforeUrl = await uploadToCloudStorage(beforeFile);
+        var afterUrl = await uploadToCloudStorage(afterFile);
 
-        var newProject = {
-          id: Date.now(),
-          title: title,
-          category: category,
-          before: beforeB64,
-          after: afterB64
-        };
+        var insertRes = await supabase.from('projects').insert([
+          {
+            title: title,
+            category: category,
+            before_img: beforeUrl,
+            after_img: afterUrl
+          }
+        ]);
 
-        var current = getProjects();
-        current.unshift(newProject);
-        saveProjects(current);
+        if (insertRes.error) throw insertRes.error;
 
         addProjectForm.reset();
         renderAdminProjectList();
-        renderGallery();
-        alert('Project successfully published to your live website gallery!');
+        fetchLiveProjects();
+        alert('Project successfully published live to all visitors!');
       } catch (err) {
-        alert('Error processing images. Please try different photos.');
+        console.error(err);
+        alert('Upload failed: ' + (err.message || 'Check database permissions.'));
       } finally {
         publishProjBtn.disabled = false;
         publishProjBtn.textContent = 'Publish Project';
@@ -427,7 +445,7 @@
   }
 
   /* ------------------------------------------------------------------
-     7. Blog Toggles
+     8. Blog "Read More" Toggle
      ------------------------------------------------------------------ */
   Array.prototype.forEach.call(document.querySelectorAll('.blog-toggle'), function (btn) {
     btn.addEventListener('click', function () {
@@ -441,7 +459,7 @@
   });
 
   /* ------------------------------------------------------------------
-     8. Quote Form Engine + WhatsApp Fallback
+     9. Quote Form Engine (Direct WhatsApp Dispatch)
      ------------------------------------------------------------------ */
   var quoteModal = document.getElementById('quoteModal');
   var quoteModalClose = document.getElementById('modalClose');
@@ -451,7 +469,6 @@
   var modalDoneBtn = document.getElementById('modalDoneBtn');
   var serviceSelect = document.getElementById('q-service');
   var dateInput = document.getElementById('q-date');
-  var quoteSubmitBtn = document.getElementById('quoteSubmitBtn');
   var waFollowUpAction = document.getElementById('waFollowUpAction');
 
   if (dateInput) {
@@ -570,56 +587,36 @@
         return;
       }
 
-      quoteSubmitBtn.disabled = true;
-      quoteSubmitBtn.textContent = 'Sending Request...';
+      modalFormWrap.hidden = true;
+      modalSuccess.hidden = false;
 
-      var formData = new FormData(quoteForm);
+      var clientPhone = "16723995554";
+      var waMessage = 
+        "🌿 *NEW QUOTE REQUEST — H&H IVY LANDSCAPING*\n\n" +
+        "👤 *Name:* " + validation.data.name + "\n" +
+        "📞 *Phone:* " + validation.data.phone + "\n" +
+        "📧 *Email:* " + validation.data.email + "\n" +
+        "📍 *City:* " + validation.data.city + "\n" +
+        "🛠️ *Service:* " + validation.data.service + "\n" +
+        "📅 *Preferred Date:* " + validation.data.date + "\n" +
+        "⏰ *Preferred Time:* " + validation.data.time + "\n" +
+        (validation.data.description ? "📝 *Notes:* " + validation.data.description + "\n" : "");
 
-      fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        body: formData
-      })
-      .then(function(res) {
-        if (res.ok) {
-          modalFormWrap.hidden = true;
-          modalSuccess.hidden = false;
+      var waUrl = "https://wa.me/" + clientPhone + "?text=" + encodeURIComponent(waMessage);
 
-          var clientPhone = "16723995554";
-          var waMessage = 
-            "🌿 *NEW QUOTE REQUEST — H&H IVY LANDSCAPING*\n\n" +
-            "👤 *Name:* " + validation.data.name + "\n" +
-            "📞 *Phone:* " + validation.data.phone + "\n" +
-            "📧 *Email:* " + validation.data.email + "\n" +
-            "📍 *City:* " + validation.data.city + "\n" +
-            "🛠️ *Service:* " + validation.data.service + "\n" +
-            "📅 *Preferred Date:* " + validation.data.date + "\n" +
-            "⏰ *Preferred Time:* " + validation.data.time + "\n" +
-            (validation.data.description ? "📝 *Notes:* " + validation.data.description + "\n" : "");
+      if (waFollowUpAction) {
+        waFollowUpAction.innerHTML = 
+          '<a href="' + waUrl + '" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-glow btn-block" style="background:#25D366; border-color:#25D366;">' +
+            '<span>Open in WhatsApp</span> &rarr;' +
+          '</a>';
+      }
 
-          var waUrl = "https://wa.me/" + clientPhone + "?text=" + encodeURIComponent(waMessage);
-
-          if (waFollowUpAction) {
-            waFollowUpAction.innerHTML = 
-              '<a href="' + waUrl + '" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-glow btn-block" style="background:#25D366; border-color:#25D366;">' +
-                '<span>Open in WhatsApp for Priority Dispatch</span> &rarr;' +
-              '</a>';
-          }
-        } else {
-          alert('There was an issue sending your form. Please call us directly.');
-        }
-      })
-      .catch(function() {
-        alert('Network error. Please check your internet connection.');
-      })
-      .finally(function() {
-        quoteSubmitBtn.disabled = false;
-        quoteSubmitBtn.textContent = 'Submit Request';
-      });
+      window.open(waUrl, '_blank');
     });
   }
 
   /* ------------------------------------------------------------------
-     9. Live Weather & Seasonal Advisory Banner (Open-Meteo API)
+     10. Live Weather & Seasonal Turf Advisory Banner
      ------------------------------------------------------------------ */
   var weatherBanner = document.getElementById('weatherBanner');
   var weatherTempEl = document.getElementById('weatherTemp');
@@ -672,7 +669,7 @@
   fetchSurreyWeather();
 
   /* ------------------------------------------------------------------
-     10. Comprehensive Animation Suite
+     11. Comprehensive Animation Suite
      ------------------------------------------------------------------ */
 
   // A. Scroll-Triggered Animated Counters
@@ -689,7 +686,6 @@
       function step(timestamp) {
         if (!startTime) startTime = timestamp;
         var progress = Math.min((timestamp - startTime) / duration, 1);
-        // Ease-out cubic formula
         var easeOut = 1 - Math.pow(1 - progress, 3);
         el.textContent = Math.floor(easeOut * target);
 
@@ -831,6 +827,5 @@
     }
     renderLeaves();
   }
-
 
 })();
