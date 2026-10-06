@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Ping Supabase
+       - name: Ping Supabase
         run: |
-          curl -X PATCH \
+          curl --fail-with-body --max-time 30 -X PATCH \
             "${{ secrets.SUPABASE_URL }}/rest/v1/keep_alive?id=eq.1" \
             -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}" \
